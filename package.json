@@ -1,0 +1,41 @@
+{
+	"name": "@graphrefly/react",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Reactive binding + presentation layer for GraphReFly (React). Currently a binding-core spike on top of @graphrefly/ts.",
+	"type": "module",
+	"packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319",
+	"engines": {
+		"node": ">=24"
+	},
+	"scripts": {
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"format": "biome format --write .",
+		"typecheck": "tsc --noEmit",
+		"build": "tsc",
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.6",
+		"@testing-library/dom": "^10.4.1",
+		"@testing-library/react": "^16.3.2",
+		"@types/node": "^25.5.0",
+		"@types/react": "^19.2.15",
+		"@types/react-dom": "^19.2.3",
+		"jsdom": "^29.1.1",
+		"typescript": "^5.7.0",
+		"vitest": "^4.1.7"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"@biomejs/biome"
+		]
+	},
+	"dependencies": {
+		"@graphrefly/pure-ts": "link:../graphrefly-ts/packages/pure-ts",
+		"react": "^19.2.6",
+		"react-dom": "^19.2.6"
+	}
+}

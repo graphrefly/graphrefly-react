@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+out/
+build/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Caches
+.cache/
+.vite/
+.turbo/
+*.tmp
+.pnpm-store/
+
+# Environment (keep examples)
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
