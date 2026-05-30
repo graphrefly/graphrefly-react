@@ -15,7 +15,9 @@
 		"typecheck": "tsc --noEmit",
 		"build": "tsc",
 		"test": "vitest run",
-		"test:watch": "vitest"
+		"test:watch": "vitest",
+		"dashboard": "node dashboard/build.mjs",
+		"dashboard:check": "node dashboard/build.mjs --check"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.6",

@@ -7,6 +7,9 @@ out/
 build/
 *.tsbuildinfo
 
+# Generated dashboard (regenerate with `pnpm dashboard`)
+dashboard/dashboard.html
+
 # Logs
 logs/
 *.log
