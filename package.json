@@ -36,7 +36,7 @@
 		]
 	},
 	"dependencies": {
-		"@graphrefly/pure-ts": "link:../graphrefly-ts/packages/pure-ts",
+		"@graphrefly/ts": "link:../graphrefly-ts/packages/ts",
 		"react": "^19.2.6",
 		"react-dom": "^19.2.6"
 	}

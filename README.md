@@ -6,7 +6,7 @@ Reactive binding + presentation layer for [GraphReFly](https://github.com/) on R
 unverified assumption behind the workbench product vision: that a **two-way reactive
 binding** between GraphReFly graph nodes and React widgets works cleanly —
 
-- input widget → boundary `producer` / `state` node (reactive `NodeInput`, not imperative)
+- input widget → boundary writable `state` node (reactive input, not imperative)
 - output widget ← boundary `derived` node (push-on-subscribe)
 
 It builds **on top of** `@graphrefly/ts` (the engine); it never reimplements the substrate.

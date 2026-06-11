@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@graphrefly/pure-ts':
-        specifier: link:../graphrefly-ts/packages/pure-ts
-        version: link:../graphrefly-ts/packages/pure-ts
+      '@graphrefly/ts':
+        specifier: link:../graphrefly-ts/packages/ts
+        version: link:../graphrefly-ts/packages/ts
       react:
         specifier: ^19.2.6
         version: 19.2.6

@@ -2,7 +2,7 @@
 // Boundary manifest (spike, slice 2) — read a graph's BOUNDARY nodes so the
 // presentation layer knows which widgets to offer and which node each binds to.
 //
-//   source (no incoming deps)  -> "input"  widget  (gauge;   useNodeInput)
+//   writable source            -> "input"  widget  (gauge;   useNodeInput)
 //   sink   (no outgoing edge)  -> "output" widget  (display; useNodeValue)
 //   interior (both)            -> omitted (plumbing)
 //
@@ -11,27 +11,38 @@
 // Capability-tag extraction from node meta is the next refinement.
 // ---------------------------------------------------------------------------
 
-import type { Graph } from "@graphrefly/pure-ts";
-import type { Node } from "@graphrefly/pure-ts/core";
+import type { Graph, Node } from "@graphrefly/ts";
+import type { WritableNode } from "@graphrefly/ts/adapters";
 
 export type BoundaryRole = "input" | "output";
 
-export interface BoundaryNode {
+export interface BaseBoundaryNode {
 	/** Registered node name (path). */
 	name: string;
 	/** Where it sits on the graph boundary. */
 	role: BoundaryRole;
-	/** describe() kind: "state" | "producer" | "derived" | "effect" | ... */
+	/** describe() factory: "state" | "producer" | "derived" | "effect" | ... */
 	type: string;
 	/** Live handle — bind a widget directly: `useNodeInput(node)` / `useNodeValue(node)`. */
 	node: Node<unknown>;
 }
 
+export interface InputBoundaryNode extends BaseBoundaryNode {
+	role: "input";
+	node: WritableNode<unknown>;
+}
+
+export interface OutputBoundaryNode extends BaseBoundaryNode {
+	role: "output";
+}
+
+export type BoundaryNode = InputBoundaryNode | OutputBoundaryNode;
+
 export interface BoundaryManifest {
 	/** Sources — gauges that feed the graph. */
-	inputs: BoundaryNode[];
+	inputs: InputBoundaryNode[];
 	/** Sinks — displays the graph produces. */
-	outputs: BoundaryNode[];
+	outputs: OutputBoundaryNode[];
 }
 
 /**
@@ -43,20 +54,27 @@ export interface BoundaryManifest {
  */
 export function boundaryManifest(graph: Graph): BoundaryManifest {
 	const described = graph.describe();
-	const nodes = described.nodes ?? {};
+	const nodes = described.nodes ?? [];
 	const consumed = new Set((described.edges ?? []).map((e) => e.from));
 
-	const inputs: BoundaryNode[] = [];
-	const outputs: BoundaryNode[] = [];
+	const inputs: InputBoundaryNode[] = [];
+	const outputs: OutputBoundaryNode[] = [];
 
-	for (const [name, entry] of Object.entries(nodes)) {
+	for (const entry of nodes) {
+		const node = graph.find(entry.id);
+		// Auto-discovered graphless describe entries are snapshot-only; widgets need a live handle.
+		if (node === undefined) continue;
 		const isSource = (entry.deps?.length ?? 0) === 0;
-		if (isSource) {
-			inputs.push({ name, role: "input", type: entry.type, node: graph.node(name) });
-		} else if (!consumed.has(name)) {
-			outputs.push({ name, role: "output", type: entry.type, node: graph.node(name) });
+		if (isSource && isWritableNode(node)) {
+			inputs.push({ name: entry.id, role: "input", type: entry.factory, node });
+		} else if (!consumed.has(entry.id)) {
+			outputs.push({ name: entry.id, role: "output", type: entry.factory, node });
 		}
 	}
 
 	return { inputs, outputs };
+}
+
+function isWritableNode(node: Node<unknown>): node is WritableNode<unknown> {
+	return typeof (node as { set?: unknown }).set === "function";
 }

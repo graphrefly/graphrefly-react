@@ -7,7 +7,7 @@
 ## What this is
 
 `@graphrefly/react` — the reactive **binding + presentation** layer for GraphReFly.
-It builds on top of `@graphrefly/pure-ts` (the engine); it **never reimplements the
+It builds on top of `@graphrefly/ts` (the engine); it **never reimplements the
 substrate**. Today it is a **validated binding-core spike**, not a product.
 
 ## What the spike proved
@@ -16,7 +16,7 @@ The riskiest, previously-unvalidated assumption of the workbench product vision 
 proven on the real substrate:
 
 - **node ⇄ widget two-way reactive binding works** — input widget → boundary
-  `state`/`producer` (reactive write), output widget ← boundary `derived`
+  writable `state` node (reactive write), output widget ← boundary `derived`
   (push-on-subscribe); SENTINEL (`undefined`) is distinguishable from a valid `null`.
 - **a graph's boundary can be read structurally** (`boundaryManifest`) and
   **auto-rendered into a bound, reactive UI with zero hand-wiring** (`AutoPanel`).
@@ -38,7 +38,7 @@ A2UI widget catalog, topology flow-view, robustness, productionization).
 
 ## Layering (where code belongs)
 
-- `@graphrefly/pure-ts` (in graphrefly-ts) — substrate. Untouched here.
+- `@graphrefly/ts` (in graphrefly-ts) — substrate + graph layer. Untouched here.
 - pure `GraphSpec → string` renderers (`graphSpecToMermaid/D2/Ascii`) — stay in graphrefly-ts
   (`extra/render`); framework-agnostic data layer.
 - **this repo** — the binding core (the one irreplaceable piece) + presentation. React binding

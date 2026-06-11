@@ -1,16 +1,13 @@
-import { Graph } from "@graphrefly/pure-ts";
+import { graph } from "@graphrefly/ts";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { AutoPanel } from "./auto-panel.js";
 
 // A graph with one source (input) -> interior reduce -> one sink (output).
 function doublerGraph() {
-	const g = new Graph("auto");
-	g.state<number>("amount", 0);
-	g.derived<number>("doubled", ["amount"], (data, ctx) => {
-		const latest = data[0]?.at(-1) ?? ctx.prevData[0];
-		return latest == null ? [] : [(latest as number) * 2];
-	});
+	const g = graph({ name: "auto" });
+	const amount = g.state<number>(0, { name: "amount" });
+	g.derived([amount], (value) => value * 2, { name: "doubled" });
 	return g;
 }
 
@@ -29,5 +26,19 @@ describe("AutoPanel — a usable UI auto-grown from a graph", () => {
 			fireEvent.change(input, { target: { value: "21" } });
 		});
 		expect(screen.getByTestId("out:doubled").textContent).toBe("42"); // 21 * 2
+	});
+
+	it("updates its manifest when the graph topology changes after mount", () => {
+		const g = graph({ name: "dynamic" });
+		const amount = g.state<number>(1, { name: "amount" });
+
+		render(<AutoPanel graph={g} />);
+		expect(screen.queryByTestId("out:incremented")).toBeNull();
+
+		act(() => {
+			g.derived([amount], (value) => value + 1, { name: "incremented" });
+		});
+
+		expect(screen.getByTestId("out:incremented").textContent).toBe("2");
 	});
 });

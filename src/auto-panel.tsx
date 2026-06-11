@@ -2,7 +2,7 @@
 // AutoPanel (spike, slice 3) — slices 1 + 2 composed.
 //
 // Give it a graph and it grows a usable panel with ZERO hand-wiring:
-//   boundaryManifest -> one input widget per source, one output per sink,
+//   boundaryManifest -> one input widget per writable source, one output per sink,
 //   each bound to its live node via useNodeInput / useNodeValue.
 //
 // This is the "give a graph -> auto-render an interface" payoff. Widget choice
@@ -10,12 +10,13 @@
 // from a trusted catalog (the rentable layer) without changing the binding.
 // ---------------------------------------------------------------------------
 
-import type { Graph } from "@graphrefly/pure-ts";
-import { useMemo } from "react";
-import { type BoundaryNode, boundaryManifest } from "./boundary.js";
+import type { Graph } from "@graphrefly/ts";
+import { useEffect, useState } from "react";
+import type { BoundaryManifest } from "./boundary.js";
+import { boundaryManifest, type InputBoundaryNode, type OutputBoundaryNode } from "./boundary.js";
 import { useNodeInput, useNodeValue } from "./use-node.js";
 
-function InputWidget({ entry }: { entry: BoundaryNode }) {
+function InputWidget({ entry }: { entry: InputBoundaryNode }) {
 	const [value, set] = useNodeInput(entry.node);
 	const testid = `in:${entry.name}`;
 
@@ -61,7 +62,7 @@ function InputWidget({ entry }: { entry: BoundaryNode }) {
 	);
 }
 
-function OutputWidget({ entry }: { entry: BoundaryNode }) {
+function OutputWidget({ entry }: { entry: OutputBoundaryNode }) {
 	const v = useNodeValue(entry.node);
 	const text =
 		v === undefined
@@ -78,13 +79,21 @@ function OutputWidget({ entry }: { entry: BoundaryNode }) {
 	);
 }
 
+function useBoundaryManifest(graph: Graph): BoundaryManifest {
+	const [, setTopologyVersion] = useState(0);
+	useEffect(() => {
+		return graph.observeTopology().subscribe(() => setTopologyVersion((version) => version + 1));
+	}, [graph]);
+	return boundaryManifest(graph);
+}
+
 /**
  * Auto-render a usable panel straight from a graph's boundary: one input widget
- * per source, one output widget per sink — each bound to its node with zero
+ * per writable source, one output widget per sink — each bound to its node with zero
  * hand-wiring. Slices 1 + 2 composed: manifest → widgets → live reactive binding.
  */
 export function AutoPanel({ graph }: { graph: Graph }) {
-	const manifest = useMemo(() => boundaryManifest(graph), [graph]);
+	const manifest = useBoundaryManifest(graph);
 	return (
 		<div>
 			<section aria-label="inputs">

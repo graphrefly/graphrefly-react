@@ -1,13 +1,13 @@
-import { Graph } from "@graphrefly/pure-ts";
+import { graph } from "@graphrefly/ts";
 import { describe, expect, it } from "vitest";
 import { boundaryManifest } from "./boundary.js";
 
 describe("boundaryManifest", () => {
 	it("classifies sources as inputs, sinks as outputs, and omits interior nodes", () => {
-		const g = new Graph("m");
-		g.state("amount", 0); // source -> input
-		g.derived("taxed", ["amount"], () => [1]); // interior (has a dep AND a consumer)
-		g.derived("total", ["taxed"], () => [1]); // sink -> output
+		const g = graph({ name: "m" });
+		const amount = g.state(0, { name: "amount" }); // source -> input
+		const taxed = g.derived([amount], () => 1, { name: "taxed" }); // interior
+		g.derived([taxed], () => 1, { name: "total" }); // sink -> output
 
 		const m = boundaryManifest(g);
 		expect(m.inputs.map((n) => n.name)).toEqual(["amount"]);
@@ -18,18 +18,18 @@ describe("boundaryManifest", () => {
 	});
 
 	it("exposes the live node handle so a widget can bind directly", () => {
-		const g = new Graph("m2");
-		const amount = g.state("amount", 0);
-		g.derived("out", ["amount"], () => [1]);
+		const g = graph({ name: "m2" });
+		const amount = g.state(0, { name: "amount" });
+		g.derived([amount], () => 1, { name: "out" });
 
 		const m = boundaryManifest(g);
 		expect(m.inputs[0].node).toBe(amount);
 	});
 
 	it("keeps a consumed source as an input (a gauge feeding the graph), not interior", () => {
-		const g = new Graph("m3");
-		g.state("amount", 0); // no deps but consumed by `out`
-		g.derived("out", ["amount"], () => [1]);
+		const g = graph({ name: "m3" });
+		const amount = g.state(0, { name: "amount" }); // no deps but consumed by `out`
+		g.derived([amount], () => 1, { name: "out" });
 
 		const m = boundaryManifest(g);
 		expect(m.inputs.map((n) => n.name)).toContain("amount");
