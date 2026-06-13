@@ -11,9 +11,8 @@
 // ---------------------------------------------------------------------------
 
 import type { Graph } from "@graphrefly/ts";
-import { useEffect, useState } from "react";
-import type { BoundaryManifest } from "./boundary.js";
-import { boundaryManifest, type InputBoundaryNode, type OutputBoundaryNode } from "./boundary.js";
+import type { InputBoundaryNode, OutputBoundaryNode } from "./boundary.js";
+import { useBoundaryManifest } from "./use-boundary-manifest.js";
 import { useNodeInput, useNodeValue } from "./use-node.js";
 
 function InputWidget({ entry }: { entry: InputBoundaryNode }) {
@@ -79,20 +78,16 @@ function OutputWidget({ entry }: { entry: OutputBoundaryNode }) {
 	);
 }
 
-function useBoundaryManifest(graph: Graph): BoundaryManifest {
-	const [, setTopologyVersion] = useState(0);
-	useEffect(() => {
-		return graph.observeTopology().subscribe(() => setTopologyVersion((version) => version + 1));
-	}, [graph]);
-	return boundaryManifest(graph);
-}
-
 /**
  * Auto-render a usable panel straight from a graph's boundary: one input widget
  * per writable source, one output widget per sink — each bound to its node with zero
  * hand-wiring. Slices 1 + 2 composed: manifest → widgets → live reactive binding.
  */
-export function AutoPanel({ graph }: { graph: Graph }) {
+export interface AutoPanelProps {
+	graph: Graph;
+}
+
+export function AutoPanel({ graph }: AutoPanelProps) {
 	const manifest = useBoundaryManifest(graph);
 	return (
 		<div>

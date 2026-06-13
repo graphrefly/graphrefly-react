@@ -6,9 +6,10 @@
 
 ## What this is
 
-`@graphrefly/react` — the reactive **binding + presentation** layer for GraphReFly.
+`@graphrefly/react` — the reactive **binding + presentation SDK** for GraphReFly.
 It builds on top of `@graphrefly/ts` (the engine); it **never reimplements the
-substrate**. Today it is a **validated binding-core spike**, not a product.
+substrate**. Today it is a **minimal binding SDK surface** grown from the validated
+binding-core spike, not a Canvas product.
 
 ## What the spike proved
 
@@ -20,13 +21,16 @@ proven on the real substrate:
   (push-on-subscribe); SENTINEL (`undefined`) is distinguishable from a valid `null`.
 - **a graph's boundary can be read structurally** (`boundaryManifest`) and
   **auto-rendered into a bound, reactive UI with zero hand-wiring** (`AutoPanel`).
+- **React consumers can observe boundary topology without copying binding wiring**
+  (`useBoundaryManifest`), while package exports/declarations make the SDK consumable by
+  product hosts such as `@graphrefly/canvas`.
 
 → the moat ("malleable reactive substrate → auto-grown UI") is technically real.
 
 ## Sequencing — when the rest happens
 
 - **De-risking is done.** The spike's job (answer "does the binding core work?") is complete.
-- **Product slices are PARKED until graphrefly hits 1.0.** Building more on a still-converging
+- **Product slices remain PARKED until graphrefly hits 1.0.** Building more on a still-converging
   substrate = rework + dilutes the ts/rust/py tracks. The spike exists precisely so the build
   can be deferred with confidence.
 - **Parallel-safe now:** docs + dashboard (this), and keeping the spike green if a substrate
