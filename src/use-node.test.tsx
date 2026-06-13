@@ -1,8 +1,8 @@
 import { graph, type Node } from "@graphrefly/ts";
 import type { WritableNode } from "@graphrefly/ts/adapters";
+import { useNodeInput, useNodeRecord, useNodeValue } from "@graphrefly/ts/adapters/react";
 import { act, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { useNodeInput, useNodeValue } from "./use-node.js";
 
 // A real graph (no mocks): an input `state` node feeding a `derived` output.
 // This is the minimal "boundary input -> reduce -> boundary output" the
@@ -60,5 +60,27 @@ describe("two-way node ⇄ widget binding", () => {
 			raw.down([["DATA", null]]); // emit a *valid* null DATA
 		});
 		expect(screen.getByTestId("probe").textContent).toBe("null-data");
+	});
+
+	it("subscribes to keyed node records with a stable factory identity", () => {
+		const g = graph({ name: "record" });
+		const keys = g.state<readonly string[]>(["a"]);
+		const a = g.state(1);
+		const b = g.state(2);
+		const nodes: Record<string, typeof a> = { a, b };
+		const factory = (key: string) => ({ value: nodes[key] });
+
+		function Probe() {
+			const record = useNodeRecord(keys, factory);
+			return <output data-testid="record">{JSON.stringify(record)}</output>;
+		}
+
+		render(<Probe />);
+		expect(screen.getByTestId("record").textContent).toBe('{"a":{"value":1}}');
+
+		act(() => {
+			keys.set(["a", "b"]);
+		});
+		expect(screen.getByTestId("record").textContent).toBe('{"a":{"value":1},"b":{"value":2}}');
 	});
 });

@@ -6,10 +6,11 @@
 
 ## What this is
 
-`@graphrefly/react` — the reactive **binding + presentation SDK** for GraphReFly.
+`@graphrefly/react` — the React **live hook + reference presentation SDK** for GraphReFly.
 It builds on top of `@graphrefly/ts` (the engine); it **never reimplements the
-substrate**. Today it is a **minimal binding SDK surface** grown from the validated
-binding-core spike, not a Canvas product.
+substrate**. After D238, `@graphrefly/ts` owns framework node bindings and the
+framework-neutral boundary manifest; this package consumes/re-exports those contracts and
+keeps only React live topology hooks plus reference UI.
 
 ## What the spike proved
 
@@ -19,8 +20,10 @@ proven on the real substrate:
 - **node ⇄ widget two-way reactive binding works** — input widget → boundary
   writable `state` node (reactive write), output widget ← boundary `derived`
   (push-on-subscribe); SENTINEL (`undefined`) is distinguishable from a valid `null`.
+  The reusable hook implementation now lives in `@graphrefly/ts/adapters/react`.
 - **a graph's boundary can be read structurally** (`boundaryManifest`) and
   **auto-rendered into a bound, reactive UI with zero hand-wiring** (`AutoPanel`).
+  The framework-neutral boundary contract now lives in `@graphrefly/ts/inspection/boundary`.
 - **React consumers can observe boundary topology without copying binding wiring**
   (`useBoundaryManifest`), while package exports/declarations make the SDK consumable by
   product hosts such as `@graphrefly/canvas`.
@@ -42,9 +45,10 @@ A2UI widget catalog, topology flow-view, robustness, productionization).
 
 ## Layering (where code belongs)
 
-- `@graphrefly/ts` (in graphrefly-ts) — substrate + graph layer. Untouched here.
+- `@graphrefly/ts` (in graphrefly-ts) — substrate + graph layer, framework node bindings,
+  and the framework-neutral boundary manifest.
 - pure `GraphSpec → string` renderers (`graphSpecToMermaid/D2/Ascii`) — stay in graphrefly-ts
   (`extra/render`); framework-agnostic data layer.
-- **this repo** — the binding core (the one irreplaceable piece) + presentation. React binding
-  is binding-layer; the core stays React-free.
+- **this repo** — React live boundary hook + reference presentation. It does not own Canvas
+  slots/pinning/topology lens/dataPath/workspace placement.
 - registry / app-store / fork / relay / BYOK — the **product** repo, not here.

@@ -1,8 +1,10 @@
 # graphrefly-react — agent context
 
-`@graphrefly/react` — reactive **binding + presentation** layer for GraphReFly. Builds on
-`@graphrefly/ts` (the engine); **never reimplements the substrate**. Currently a
-**validated binding-core spike** (not a product) — see `docs/plan.md` and the dashboard.
+`@graphrefly/react` — React **live hook + reference presentation** layer for GraphReFly. Builds on
+`@graphrefly/ts` (the engine); **never reimplements the substrate**. The reusable framework
+node bindings and framework-neutral boundary manifest live in `@graphrefly/ts` focused
+subpaths (D238); this repo consumes/re-exports them and owns only React live topology hooks
+and reference UI.
 
 > **This file points, it does not host.** Authority for the engine + protocol lives elsewhere;
 > do not duplicate it here.
@@ -22,8 +24,8 @@
   This repo is React/binding-layer; the engine is never reimplemented here.
 - **Pure `GraphSpec → string` projections** (mermaid/d2/ascii) live in graphrefly-ts
   `extra/render`, NOT here. Only the interactive, DOM-bound layer lives here.
-- **The binding core is the one irreplaceable piece** (`src/use-node.ts`). Canvas / widgets /
-  charts / code-editor are rentable OSS layered on top.
+- **React live boundary + reference UI are the irreplaceable pieces here.** Canvas / widgets /
+  charts / code-editor are rentable OSS layered on top, while generic bindings stay in TS.
 
 ## Binding invariants (from the family — keep bulletproof)
 
@@ -32,8 +34,9 @@
 - **SENTINEL** — `undefined` = node never emitted DATA (global SENTINEL); `null` = a *valid*
   DATA value. Distinguish with `=== undefined`, never falsiness.
 - **push-on-subscribe** — subscribing delivers cached DATA; wire observers before any kick.
-- Build hooks over `@graphrefly/ts/adapters` (`reactExternalStore` / `subscribeNodeValues`);
-  don't recreate framework-specific substrate semantics here.
+- Build live hooks over `@graphrefly/ts/adapters/react` and
+  `@graphrefly/ts/inspection/boundary`; don't recreate framework-specific substrate or
+  boundary semantics here.
 
 ## Commands
 
@@ -48,5 +51,6 @@ pnpm run dashboard:check # consistency gate (non-zero on broken state)
 
 ## Status
 
-Binding-core spike DONE + PARKED (3 slices, 8 tests green). Product slices = post-graphrefly-1.0
+Binding-core spike DONE + PARKED, with D238 bindings/boundary moved to TS-owned subpaths.
+Product slices = post-graphrefly-1.0
 (see dashboard). Do not build product layers on the still-converging substrate.

@@ -10,14 +10,16 @@ binding** between GraphReFly graph nodes and React widgets works cleanly —
 - output widget ← boundary `derived` node (push-on-subscribe)
 
 It builds **on top of** `@graphrefly/ts` (the engine); it never reimplements the substrate.
-Pure `GraphSpec → string` projections (mermaid/d2/ascii) stay in `@graphrefly/ts`
-(`extra/render`); only the interactive, DOM-bound layer lives here.
+Framework node bindings and the framework-neutral boundary manifest are owned by
+`@graphrefly/ts` focused subpaths. This package re-exports the React binding basics and
+adds only React live topology hooks plus reference UI.
 
 ## Public SDK Surface
 
-- `useNodeValue(node)` — bind output widgets to node DATA with SENTINEL-aware `undefined`.
-- `useNodeInput(node)` — bind input widgets to writable GraphReFly state nodes.
-- `boundaryManifest(graph)` — derive graph boundary inputs/outputs from `describe()`.
+- `useNodeValue(node)` — re-export from `@graphrefly/ts/adapters/react`.
+- `useNodeInput(node)` — re-export from `@graphrefly/ts/adapters/react`.
+- `useNodeRecord(keysNode, factory)` — re-export from `@graphrefly/ts/adapters/react`; `factory` must have stable identity.
+- `boundaryManifest(graph)` — re-export from `@graphrefly/ts/inspection/boundary`.
 - `useBoundaryManifest(graph)` — React hook that refreshes the manifest on topology changes.
 - `AutoPanel` — small reference presentation over the binding primitives.
 
@@ -34,6 +36,7 @@ pnpm typecheck
 
 ## Not here (lives in the product repo)
 
-registry / app-store, Canvas topology lens, widget-slot pinning, reactive-layout ownership,
-measurement-provider policy, fork + one-click-config, BYOK/Nano wiring, OAuth/MCP connectors,
-relay/push, billing. This package is the reusable SDK seam only.
+Canvas topology lens, widget-slot pinning, workspace placement, dataPath ownership,
+reactive-layout ownership, measurement-provider policy, registry / app-store, fork +
+one-click-config, BYOK/Nano wiring, OAuth/MCP connectors, relay/push, billing. This package
+is the reusable React live hook/reference UI layer only.

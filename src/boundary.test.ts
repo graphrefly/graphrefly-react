@@ -1,6 +1,6 @@
 import { graph } from "@graphrefly/ts";
+import { boundaryManifest } from "@graphrefly/ts/inspection/boundary";
 import { describe, expect, it } from "vitest";
-import { boundaryManifest } from "./boundary.js";
 
 describe("boundaryManifest", () => {
 	it("classifies sources as inputs, sinks as outputs, and omits interior nodes", () => {

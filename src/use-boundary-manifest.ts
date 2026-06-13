@@ -1,11 +1,14 @@
 import type { Graph } from "@graphrefly/ts";
+import { type BoundaryManifest, boundaryManifest } from "@graphrefly/ts/inspection/boundary";
 import { useMemo, useSyncExternalStore } from "react";
-import type { BoundaryManifest } from "./boundary.js";
-import { boundaryManifest } from "./boundary.js";
 
 function topologySnapshot(graph: Graph): string {
 	const described = graph.describe();
-	return JSON.stringify({
+	return JSON.stringify(projectTopology(described));
+}
+
+function projectTopology(described: ReturnType<Graph["describe"]>): unknown {
+	return {
 		nodes: described.nodes?.map((node) => ({
 			id: node.id,
 			deps: node.deps,
@@ -13,7 +16,8 @@ function topologySnapshot(graph: Graph): string {
 			name: node.name,
 		})),
 		edges: described.edges,
-	});
+		subgraphs: described.subgraphs?.map(projectTopology),
+	};
 }
 
 /**

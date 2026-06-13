@@ -11,9 +11,9 @@
 // ---------------------------------------------------------------------------
 
 import type { Graph } from "@graphrefly/ts";
-import type { InputBoundaryNode, OutputBoundaryNode } from "./boundary.js";
+import { useNodeInput, useNodeValue } from "@graphrefly/ts/adapters/react";
+import type { InputBoundaryNode, OutputBoundaryNode } from "@graphrefly/ts/inspection/boundary";
 import { useBoundaryManifest } from "./use-boundary-manifest.js";
-import { useNodeInput, useNodeValue } from "./use-node.js";
 
 function InputWidget({ entry }: { entry: InputBoundaryNode }) {
 	const [value, set] = useNodeInput(entry.node);
