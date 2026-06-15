@@ -29,7 +29,7 @@
 		"lint:fix": "biome check --write .",
 		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit",
-		"build": "tsc",
+		"build": "tsc && node scripts/check-package-exports.mjs",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"dashboard": "node dashboard/build.mjs",
