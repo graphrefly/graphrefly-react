@@ -89,16 +89,23 @@ assert.equal(reactSdk.useNodeValue, useNodeValue);
 assert.equal(reactSdk.boundaryManifest, boundaryManifest);
 assert.equal(typeof reactSdk.useBoundaryManifest, "function");
 assert.equal(typeof reactSdk.AutoPanel, "function");
-`,
+assert.equal(typeof reactSdk.TopologyFlowPanel, "function");
+	`,
 	);
 	writeFileSync(
 		join(tmp, "types-smoke.mts"),
 		`import {
-	AutoPanel,
-	type BoundaryManifest,
-	type BoundaryNode,
-	type BoundaryRole,
-	boundaryManifest,
+		AutoPanel,
+		type AutoPanelInputWidgetProps,
+		type AutoPanelOutputWidgetProps,
+		type AutoPanelWidgetCatalog,
+		type AutoPanelWidgetResolverContext,
+			type BoundaryManifest,
+			type BoundaryNode,
+			type BoundaryRole,
+			TopologyFlowPanel,
+			type TopologyFlowPanelProps,
+		boundaryManifest,
 	useBoundaryManifest,
 	useNodeInput,
 	useNodeRecord,
@@ -106,18 +113,29 @@ assert.equal(typeof reactSdk.AutoPanel, "function");
 } from "@graphrefly/react";
 
 void AutoPanel;
+void TopologyFlowPanel;
 void boundaryManifest;
 void useBoundaryManifest;
 void useNodeInput;
 void useNodeRecord;
 void useNodeValue;
 
-declare const manifest: BoundaryManifest;
-const role: BoundaryRole = "input";
-const node: BoundaryNode | undefined = manifest.inputs[0] ?? manifest.outputs[0];
-void role;
-void node;
-`,
+	declare const manifest: BoundaryManifest;
+	const role: BoundaryRole = "input";
+	const node: BoundaryNode | undefined = manifest.inputs[0] ?? manifest.outputs[0];
+	declare const inputProps: AutoPanelInputWidgetProps;
+	declare const outputProps: AutoPanelOutputWidgetProps;
+		declare const catalog: AutoPanelWidgetCatalog;
+		declare const resolverContext: AutoPanelWidgetResolverContext;
+		declare const topologyFlowProps: TopologyFlowPanelProps;
+		void role;
+		void node;
+		void inputProps;
+		void outputProps;
+		void catalog;
+		void resolverContext;
+		void topologyFlowProps;
+		`,
 	);
 	writeFileSync(
 		join(tmp, "tsconfig.json"),

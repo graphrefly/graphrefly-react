@@ -10,8 +10,26 @@ export type {
 	OutputBoundaryNode,
 } from "@graphrefly/ts/inspection/boundary";
 export { boundaryManifest } from "@graphrefly/ts/inspection/boundary";
-export type { AutoPanelProps } from "./auto-panel.js";
+export type {
+	AutoPanelInputSetter,
+	AutoPanelInputWidget,
+	AutoPanelInputWidgetKey,
+	AutoPanelInputWidgetProps,
+	AutoPanelOutputWidget,
+	AutoPanelOutputWidgetKey,
+	AutoPanelOutputWidgetProps,
+	AutoPanelProps,
+	AutoPanelWidgetCatalog,
+	AutoPanelWidgetResolver,
+	AutoPanelWidgetResolverContext,
+} from "./auto-panel.js";
 export { AutoPanel } from "./auto-panel.js";
+export type {
+	TopologyFlowEdge,
+	TopologyFlowNode,
+	TopologyFlowPanelProps,
+} from "./topology-flow.js";
+export { TopologyFlowPanel } from "./topology-flow.js";
 export { useBoundaryManifest } from "./use-boundary-manifest.js";
 
 export const VERSION = "0.0.0";

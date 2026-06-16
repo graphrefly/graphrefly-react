@@ -13,10 +13,16 @@ import {
 import { describe, expect, expectTypeOf, it } from "vitest";
 import {
 	AutoPanel,
+	type AutoPanelInputWidgetProps,
+	type AutoPanelOutputWidgetProps,
+	type AutoPanelWidgetCatalog,
+	type AutoPanelWidgetResolverContext,
 	type BoundaryManifest,
 	type BoundaryNode,
 	type BoundaryRole,
 	boundaryManifest,
+	TopologyFlowPanel,
+	type TopologyFlowPanelProps,
 	useBoundaryManifest,
 	useNodeInput,
 	useNodeRecord,
@@ -34,6 +40,7 @@ describe("public root exports", () => {
 	it("exports runtime values with the expected shape", () => {
 		expect(typeof useBoundaryManifest).toBe("function");
 		expect(typeof AutoPanel).toBe("function");
+		expect(typeof TopologyFlowPanel).toBe("function");
 
 		const manifested = boundaryManifest(graph({ name: "public-export-smoke" }));
 		expect(manifested.inputs.length).toBe(0);
@@ -44,5 +51,17 @@ describe("public root exports", () => {
 		expectTypeOf<BoundaryManifest>().toEqualTypeOf<TsBoundaryManifest>();
 		expectTypeOf<BoundaryNode>().toEqualTypeOf<TsBoundaryNode>();
 		expectTypeOf<BoundaryRole>().toEqualTypeOf<TsBoundaryRole>();
+	});
+
+	it("exports AutoPanel widget catalog types", () => {
+		expectTypeOf<AutoPanelWidgetCatalog>().toHaveProperty("inputs");
+		expectTypeOf<AutoPanelWidgetCatalog>().toHaveProperty("outputs");
+		expectTypeOf<AutoPanelWidgetResolverContext>().toHaveProperty("role");
+		expectTypeOf<AutoPanelInputWidgetProps>().toHaveProperty("set");
+		expectTypeOf<AutoPanelOutputWidgetProps>().toHaveProperty("text");
+	});
+
+	it("exports topology flow panel types", () => {
+		expectTypeOf<TopologyFlowPanelProps>().toHaveProperty("graph");
 	});
 });

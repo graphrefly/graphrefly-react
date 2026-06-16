@@ -1,7 +1,7 @@
 import { graph } from "@graphrefly/ts";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { AutoPanel } from "./auto-panel.js";
+import { AutoPanel, type AutoPanelWidgetCatalog } from "./auto-panel.js";
 
 // A graph with one source (input) -> interior reduce -> one sink (output).
 function doublerGraph() {
@@ -40,5 +40,102 @@ describe("AutoPanel — a usable UI auto-grown from a graph", () => {
 		});
 
 		expect(screen.getByTestId("out:incremented").textContent).toBe("2");
+	});
+
+	it("uses caller-supplied boolean, number, and text widgets from a trusted catalog", () => {
+		const g = graph({ name: "catalog-inputs" });
+		const enabled = g.state(true, { name: "enabled" });
+		const amount = g.state(2, { name: "amount" });
+		const label = g.state("base", { name: "label" });
+		g.derived([enabled], (value) => String(value), { name: "enabled-out" });
+		g.derived([amount], (value) => value * 10, { name: "amount-out" });
+		g.derived([label], (value) => `${value}!`, { name: "label-out" });
+		const widgetCatalog: AutoPanelWidgetCatalog = {
+			inputs: {
+				boolean: ({ entry, set, value }) => (
+					<button
+						data-testid={`custom:${entry.name}`}
+						type="button"
+						onClick={() => set(value !== true)}
+					>
+						bool:{String(value)}
+					</button>
+				),
+				number: ({ entry, set, value }) => (
+					<button
+						data-testid={`custom:${entry.name}`}
+						type="button"
+						onClick={() => set(Number(value) + 1)}
+					>
+						number:{String(value)}
+					</button>
+				),
+				text: ({ entry, set, value }) => (
+					<button
+						data-testid={`custom:${entry.name}`}
+						type="button"
+						onClick={() => set(`${value}:custom`)}
+					>
+						text:{String(value)}
+					</button>
+				),
+			},
+		};
+
+		render(<AutoPanel graph={g} widgetCatalog={widgetCatalog} />);
+
+		expect(screen.getByTestId("custom:enabled").textContent).toBe("bool:true");
+		expect(screen.getByTestId("custom:amount").textContent).toBe("number:2");
+		expect(screen.getByTestId("custom:label").textContent).toBe("text:base");
+
+		act(() => {
+			screen.getByTestId("custom:amount").click();
+			screen.getByTestId("custom:label").click();
+			screen.getByTestId("custom:enabled").click();
+		});
+
+		expect(screen.getByTestId("out:amount-out").textContent).toBe("30");
+		expect(screen.getByTestId("out:label-out").textContent).toBe("base:custom!");
+		expect(screen.getByTestId("out:enabled-out").textContent).toBe("false");
+	});
+
+	it("falls back to default widgets when the resolver selects a missing catalog key", () => {
+		render(
+			<AutoPanel
+				graph={doublerGraph()}
+				widgetCatalog={{ inputs: {} }}
+				widgetResolver={() => "missing-widget"}
+			/>,
+		);
+
+		const input = screen.getByTestId("in:amount") as HTMLInputElement;
+		expect(input.type).toBe("number");
+
+		act(() => {
+			fireEvent.change(input, { target: { value: "5" } });
+		});
+		expect(screen.getByTestId("out:doubled").textContent).toBe("10");
+	});
+
+	it("resolves SENTINEL and null outputs as distinct widget keys, not fallback text", () => {
+		const g = graph({ name: "catalog-output-sentinel" });
+		const maybe = g.node<null>([], null, { name: "maybe" });
+		const widgetCatalog: AutoPanelWidgetCatalog = {
+			outputs: {
+				null: ({ entry, testId }) => <output data-testid={testId}>null:{entry.name}</output>,
+				sentinel: ({ entry, testId }) => (
+					<output data-testid={testId}>sentinel:{entry.name}</output>
+				),
+				text: ({ entry, testId }) => <output data-testid={testId}>text:{entry.name}</output>,
+			},
+		};
+
+		render(<AutoPanel graph={g} widgetCatalog={widgetCatalog} />);
+		expect(screen.getByTestId("out:maybe").textContent).toBe("sentinel:maybe");
+
+		act(() => {
+			maybe.down([["DATA", null]]);
+		});
+		expect(screen.getByTestId("out:maybe").textContent).toBe("null:maybe");
 	});
 });

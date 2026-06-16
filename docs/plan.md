@@ -24,9 +24,15 @@ proven on the real substrate:
 - **a graph's boundary can be read structurally** (`boundaryManifest`) and
   **auto-rendered into a bound, reactive UI with zero hand-wiring** (`AutoPanel`).
   The framework-neutral boundary contract now lives in `@graphrefly/ts/inspection/boundary`.
+- **trusted catalog-backed widgets can replace the crude default `typeof` selection**
+  inside the React reference UI. `AutoPanel` accepts caller-provided catalog/resolver props
+  while the generic boundary manifest remains structural and TS-owned.
 - **React consumers can observe boundary topology without copying binding wiring**
   (`useBoundaryManifest`), while package exports/declarations make the SDK consumable by
   product hosts such as `@graphrefly/canvas`.
+- **React consumers can inspect live topology visually** (`TopologyFlowPanel`) from the
+  TS-owned `describe()` snapshot and `observeTopology()` stream, without copying pure
+  renderers or owning Canvas product state.
 
 → the moat ("malleable reactive substrate → auto-grown UI") is technically real.
 
@@ -40,8 +46,9 @@ proven on the real substrate:
   API shifts. The binding only touches the *stable* part of the protocol
   (observe/subscribe/SENTINEL/teardown).
 
-See the slice table (`pnpm dashboard`) for the post-1.0 backlog (capability-tag from meta,
-A2UI widget catalog, topology flow-view, robustness, productionization).
+See the slice table (`pnpm dashboard`) for live status. Product/runtime layers such as
+capability tags from meta, productionization, registry/app-store, workspace placement, and
+full Canvas ownership remain outside this package unless a slice explicitly lands here.
 
 ## Layering (where code belongs)
 
@@ -51,4 +58,6 @@ A2UI widget catalog, topology flow-view, robustness, productionization).
   (`extra/render`); framework-agnostic data layer.
 - **this repo** — React live boundary hook + reference presentation. It does not own Canvas
   slots/pinning/topology lens/dataPath/workspace placement.
+- `TopologyFlowPanel` is a DOM-bound reference topology view over `describe()`, not a pure
+  renderer and not a Canvas runtime.
 - registry / app-store / fork / relay / BYOK — the **product** repo, not here.
