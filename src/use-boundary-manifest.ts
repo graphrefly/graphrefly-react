@@ -13,6 +13,7 @@ function projectTopology(described: ReturnType<Graph["describe"]>): unknown {
 			id: node.id,
 			deps: node.deps,
 			factory: node.factory,
+			meta: node.meta,
 			name: node.name,
 		})),
 		edges: described.edges,

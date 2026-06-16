@@ -15,6 +15,7 @@ import {
 	type BoundaryRole as TsBoundaryRole,
 	boundaryManifest as tsBoundaryManifest,
 } from "@graphrefly/ts/inspection/boundary";
+import type { ComponentType } from "react";
 import { describe, expect, expectTypeOf, it } from "vitest";
 import * as reactRoot from "./index.js";
 import {
@@ -22,6 +23,12 @@ import {
 	type A2UIBoundaryDataModel,
 	type A2UIUpdateDataModelMessage,
 	AutoPanel,
+	type AutoPanelCapabilityRenderer,
+	type AutoPanelCapabilityResolution,
+	type AutoPanelCapabilityResolver,
+	type AutoPanelCapabilityResolverContext,
+	type AutoPanelCapabilityStatus,
+	type AutoPanelCapabilityViewProps,
 	type AutoPanelInputWidgetProps,
 	type AutoPanelOutputWidgetProps,
 	type AutoPanelWidgetCatalog,
@@ -124,7 +131,25 @@ describe("public root exports", () => {
 		expectTypeOf<AutoPanelWidgetCatalog>().toHaveProperty("outputs");
 		expectTypeOf<AutoPanelWidgetResolverContext>().toHaveProperty("role");
 		expectTypeOf<AutoPanelInputWidgetProps>().toHaveProperty("set");
+		expectTypeOf<AutoPanelInputWidgetProps>().toHaveProperty("disabled");
 		expectTypeOf<AutoPanelOutputWidgetProps>().toHaveProperty("text");
+	});
+
+	it("exports AutoPanel capability affordance types without product registries", () => {
+		expectTypeOf<AutoPanelCapabilityStatus>().toEqualTypeOf<"pending" | "ready" | "unavailable">();
+		expectTypeOf<AutoPanelCapabilityResolverContext>()
+			.toHaveProperty("capability")
+			.toEqualTypeOf<TsBoundaryCapabilityRef>();
+		expectTypeOf<AutoPanelCapabilityResolution>().toHaveProperty("status");
+		expectTypeOf<AutoPanelCapabilityViewProps>()
+			.toHaveProperty("capability")
+			.toEqualTypeOf<TsBoundaryCapabilityRef>();
+		expectTypeOf<AutoPanelCapabilityRenderer>().toEqualTypeOf<
+			ComponentType<AutoPanelCapabilityViewProps>
+		>();
+		expectTypeOf<AutoPanelCapabilityResolver>().returns.toEqualTypeOf<
+			AutoPanelCapabilityResolution | AutoPanelCapabilityStatus | null | undefined
+		>();
 	});
 
 	it("exports topology flow panel types", () => {

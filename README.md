@@ -23,7 +23,8 @@ root-only until a focused optional subpath is reviewed for any heavy/product-sha
 - `boundaryManifest(graph)` — re-export from `@graphrefly/ts/inspection/boundary`.
 - `useBoundaryManifest(graph)` — React hook that refreshes the manifest on topology changes.
 - `AutoPanel` — small reference presentation over the binding primitives, with optional
-  caller-supplied trusted widget catalog/resolver props.
+  caller-supplied trusted widget catalog/resolver props plus local capability
+  display/admission affordances over generic `BoundaryCapabilityRef` data.
 - `TopologyFlowPanel` — live DOM/SVG reference topology sidebar over `graph.describe()`.
 - `useA2UIBoundaryDataModel(graph)` / `useA2UIBoundaryDataModelUpdate(graph, opts)` —
   fixed-schema A2UI data-model lowering for live boundary values. It preserves
@@ -46,7 +47,7 @@ pnpm typecheck
 Canvas product state, widget-slot pinning, workspace placement, dataPath ownership,
 reactive-layout ownership, measurement-provider policy, registry / app-store, fork +
 one-click-config, BYOK/Nano wiring, OAuth/MCP connectors, relay/push, billing. This package
-is the reusable React live hook/reference UI layer only; its widget catalog is a trusted
-React presentation hook, its A2UI helpers are fixed-schema data-model lowering only, and
-its topology panel is DOM-bound reference UI, not generic boundary metadata or a pure
-`GraphSpec → string` renderer.
+is the reusable React live hook/reference UI layer only; its widget and capability resolvers
+are trusted React presentation hooks, its A2UI helpers are fixed-schema data-model lowering
+only, and its topology panel is DOM-bound reference UI, not generic boundary metadata or a
+pure `GraphSpec → string` renderer.

@@ -29,6 +29,12 @@ export {
 	useA2UIBoundaryDataModelUpdate,
 } from "./a2ui.js";
 export type {
+	AutoPanelCapabilityRenderer,
+	AutoPanelCapabilityResolution,
+	AutoPanelCapabilityResolver,
+	AutoPanelCapabilityResolverContext,
+	AutoPanelCapabilityStatus,
+	AutoPanelCapabilityViewProps,
 	AutoPanelInputSetter,
 	AutoPanelInputWidget,
 	AutoPanelInputWidgetKey,
