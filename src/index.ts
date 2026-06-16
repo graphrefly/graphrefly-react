@@ -3,6 +3,8 @@
 
 export { useNodeInput, useNodeRecord, useNodeValue } from "@graphrefly/ts/adapters/react";
 export type {
+	BoundaryCapabilityKind,
+	BoundaryCapabilityRef,
 	BoundaryManifest,
 	BoundaryNode,
 	BoundaryRole,

@@ -5,6 +5,8 @@ import {
 	useNodeValue as tsUseNodeValue,
 } from "@graphrefly/ts/adapters/react";
 import {
+	type BoundaryCapabilityKind as TsBoundaryCapabilityKind,
+	type BoundaryCapabilityRef as TsBoundaryCapabilityRef,
 	type BoundaryManifest as TsBoundaryManifest,
 	type BoundaryNode as TsBoundaryNode,
 	type BoundaryRole as TsBoundaryRole,
@@ -20,6 +22,8 @@ import {
 	type AutoPanelOutputWidgetProps,
 	type AutoPanelWidgetCatalog,
 	type AutoPanelWidgetResolverContext,
+	type BoundaryCapabilityKind,
+	type BoundaryCapabilityRef,
 	type BoundaryManifest,
 	type BoundaryNode,
 	type BoundaryRole,
@@ -60,9 +64,14 @@ describe("public root exports", () => {
 	});
 
 	it("exports boundary types as TS contract-equivalent aliases", () => {
+		expectTypeOf<BoundaryCapabilityKind>().toEqualTypeOf<TsBoundaryCapabilityKind>();
+		expectTypeOf<BoundaryCapabilityRef>().toEqualTypeOf<TsBoundaryCapabilityRef>();
 		expectTypeOf<BoundaryManifest>().toEqualTypeOf<TsBoundaryManifest>();
 		expectTypeOf<BoundaryNode>().toEqualTypeOf<TsBoundaryNode>();
 		expectTypeOf<BoundaryRole>().toEqualTypeOf<TsBoundaryRole>();
+		expectTypeOf<BoundaryNode>()
+			.toHaveProperty("capabilities")
+			.toEqualTypeOf<BoundaryCapabilityRef[] | undefined>();
 	});
 
 	it("exports AutoPanel widget catalog types", () => {
