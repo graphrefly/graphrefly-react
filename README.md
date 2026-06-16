@@ -2,7 +2,7 @@
 
 Reactive binding + presentation layer for [GraphReFly](https://github.com/) on React.
 
-**Status: minimal binding SDK.** The original binding-core spike validated the single
+**Status: lightweight React SDK.** The original binding-core spike validated the single
 unverified assumption behind the workbench product vision: that a **two-way reactive
 binding** between GraphReFly graph nodes and React widgets works cleanly —
 
@@ -12,7 +12,8 @@ binding** between GraphReFly graph nodes and React widgets works cleanly —
 It builds **on top of** `@graphrefly/ts` (the engine); it never reimplements the substrate.
 Framework node bindings and the framework-neutral boundary manifest are owned by
 `@graphrefly/ts` focused subpaths. This package re-exports the React binding basics and
-adds only React live topology hooks plus reference UI.
+adds only React live topology hooks plus reference UI. Its package surface is intentionally
+root-only until a focused optional subpath is reviewed for any heavy/product-shaped surface.
 
 ## Public SDK Surface
 

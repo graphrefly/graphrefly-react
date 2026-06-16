@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { graph } from "@graphrefly/ts";
 import {
 	useNodeInput as tsUseNodeInput,
@@ -13,6 +16,7 @@ import {
 	boundaryManifest as tsBoundaryManifest,
 } from "@graphrefly/ts/inspection/boundary";
 import { describe, expect, expectTypeOf, it } from "vitest";
+import * as reactRoot from "./index.js";
 import {
 	A2UI_VERSION,
 	type A2UIBoundaryDataModel,
@@ -39,6 +43,47 @@ import {
 	useNodeRecord,
 	useNodeValue,
 } from "./index.js";
+
+const SRC_DIR = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(SRC_DIR, "..");
+const packageJson = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as {
+	exports?: Record<string, unknown>;
+	files?: string[];
+	sideEffects?: boolean;
+	devDependencies?: Record<string, string>;
+	peerDependencies?: Record<string, string>;
+};
+
+const allowedRuntimeRootExports = [
+	"A2UI_VERSION",
+	"AutoPanel",
+	"TopologyFlowPanel",
+	"VERSION",
+	"boundaryManifest",
+	"boundaryManifestToA2UIDataModel",
+	"boundaryManifestToA2UIDataModelUpdate",
+	"useA2UIBoundaryDataModel",
+	"useA2UIBoundaryDataModelUpdate",
+	"useBoundaryManifest",
+	"useNodeInput",
+	"useNodeRecord",
+	"useNodeValue",
+] as const;
+
+const deniedRootExports = [
+	"Canvas",
+	"CanvasProvider",
+	"CanvasRuntime",
+	"ConfigForm",
+	"DynamicA2UIRegistry",
+	"DynamicA2UIRenderer",
+	"ELK",
+	"OAuthProvider",
+	"ProviderRegistry",
+	"ReactFlow",
+	"RendererRegistry",
+	"WorkspaceGraph",
+] as const;
 
 describe("public root exports", () => {
 	it("re-exports TS node hooks and boundary contract by identity", () => {
@@ -90,5 +135,45 @@ describe("public root exports", () => {
 		expectTypeOf<A2UIBoundaryDataModel>().toHaveProperty("inputs");
 		expectTypeOf<A2UIBoundaryDataModel>().toHaveProperty("outputs");
 		expectTypeOf<A2UIUpdateDataModelMessage>().toHaveProperty("updateDataModel");
+	});
+
+	it("keeps the root runtime export surface D346-light", () => {
+		expect(Object.keys(reactRoot).sort()).toEqual([...allowedRuntimeRootExports].sort());
+
+		for (const name of deniedRootExports) {
+			expect(Object.hasOwn(reactRoot, name)).toBe(false);
+		}
+	});
+
+	it("keeps package metadata and root imports production-surface-only", () => {
+		expect(Object.keys(packageJson.exports ?? {}).sort()).toEqual(["."]);
+		expect(packageJson.files).toEqual(["dist", "README.md", "package.json"]);
+		expect(packageJson.sideEffects).toBe(false);
+		expect(packageJson.peerDependencies).toMatchObject({
+			"@graphrefly/ts": ">=0.0.0 <1.0.0",
+			react: "^18.0.0 || ^19.0.0",
+			"react-dom": "^18.0.0 || ^19.0.0",
+		});
+		const tsDevDependency = packageJson.devDependencies?.["@graphrefly/ts"];
+		expect(tsDevDependency?.startsWith("link:")).toBe(true);
+		expect(existsSync(resolve(ROOT, tsDevDependency?.slice("link:".length) ?? ""))).toBe(true);
+
+		const indexSource = readFileSync(join(SRC_DIR, "index.ts"), "utf8");
+		const imports = [
+			...new Set(Array.from(indexSource.matchAll(/\bfrom\s+"([^"]+)"/g), (match) => match[1])),
+		].sort();
+		expect(imports).toEqual([
+			"./a2ui.js",
+			"./auto-panel.js",
+			"./topology-flow.js",
+			"./use-boundary-manifest.js",
+			"@graphrefly/ts/adapters/react",
+			"@graphrefly/ts/inspection/boundary",
+		]);
+		expect(
+			imports.some((specifier) =>
+				/@graphrefly\/ts\/solutions|react-flow|elkjs|canvas/i.test(specifier),
+			),
+		).toBe(false);
 	});
 });

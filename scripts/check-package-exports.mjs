@@ -17,10 +17,39 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const TSC = join(ROOT, "node_modules", ".bin", "tsc");
 const packageJson = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
 const peerLinks = {
-	"@graphrefly/ts": resolve(ROOT, "..", "graphrefly-ts", "packages", "ts"),
+	"@graphrefly/ts": localLinkedDependency("@graphrefly/ts"),
 	react: join(ROOT, "node_modules", "react"),
 	"react-dom": join(ROOT, "node_modules", "react-dom"),
 };
+const allowedRuntimeRootExports = [
+	"A2UI_VERSION",
+	"AutoPanel",
+	"TopologyFlowPanel",
+	"VERSION",
+	"boundaryManifest",
+	"boundaryManifestToA2UIDataModel",
+	"boundaryManifestToA2UIDataModelUpdate",
+	"useA2UIBoundaryDataModel",
+	"useA2UIBoundaryDataModelUpdate",
+	"useBoundaryManifest",
+	"useNodeInput",
+	"useNodeRecord",
+	"useNodeValue",
+];
+const deniedRootExports = [
+	"Canvas",
+	"CanvasProvider",
+	"CanvasRuntime",
+	"ConfigForm",
+	"DynamicA2UIRegistry",
+	"DynamicA2UIRenderer",
+	"ELK",
+	"OAuthProvider",
+	"ProviderRegistry",
+	"ReactFlow",
+	"RendererRegistry",
+	"WorkspaceGraph",
+];
 
 function fail(message) {
 	console.error(`check-package-exports: ${message}`);
@@ -29,6 +58,14 @@ function fail(message) {
 
 function assert(condition, message) {
 	if (!condition) fail(message);
+}
+
+function localLinkedDependency(name) {
+	const spec = packageJson.devDependencies?.[name];
+	if (typeof spec !== "string" || !spec.startsWith("link:")) {
+		fail(`${name} devDependency must stay a local link while this sibling package is unpublished`);
+	}
+	return resolve(ROOT, spec.slice("link:".length));
 }
 
 function errorOutput(err) {
@@ -56,6 +93,39 @@ function validateExportTarget(path, target) {
 validateExportTarget("exports.import", packageJson.exports?.["."]?.import);
 validateExportTarget("exports.default", packageJson.exports?.["."]?.default);
 validateExportTarget("exports.types", packageJson.exports?.["."]?.types);
+assert(
+	JSON.stringify(Object.keys(packageJson.exports ?? {}).sort()) === JSON.stringify(["."]),
+	"exports must expose only the light root entry until a focused subpath is reviewed",
+);
+assert(
+	JSON.stringify(packageJson.files) === JSON.stringify(["dist", "README.md", "package.json"]),
+	"files must stay limited to dist, README.md, and package.json",
+);
+assert(packageJson.sideEffects === false, "sideEffects must stay false");
+assert(
+	packageJson.peerDependencies?.["@graphrefly/ts"] === ">=0.0.0 <1.0.0",
+	"@graphrefly/ts peerDependency must be a versioned pre-1.0 range",
+);
+assert(
+	typeof packageJson.devDependencies?.["@graphrefly/ts"] === "string" &&
+		packageJson.devDependencies["@graphrefly/ts"].startsWith("link:") &&
+		existsSync(peerLinks["@graphrefly/ts"]),
+	"local unpublished package must retain a resolvable @graphrefly/ts devDependency link",
+);
+assert(
+	packageJson.peerDependencies?.react === "^18.0.0 || ^19.0.0" &&
+		packageJson.peerDependencies?.["react-dom"] === "^18.0.0 || ^19.0.0",
+	"react/react-dom peerDependencies must cover React 18 and 19",
+);
+
+const builtIndex = readFileSync(join(ROOT, "dist", "index.js"), "utf8");
+const builtSpecifiers = Array.from(builtIndex.matchAll(/\bfrom\s+"([^"]+)"/g), (match) => match[1]);
+assert(
+	!builtSpecifiers.some((specifier) =>
+		/@graphrefly\/ts\/solutions|react-flow|elkjs|canvas/i.test(specifier),
+	),
+	"root build must not import TS solutions, Canvas, React Flow, or ELK-heavy surfaces",
+);
 
 const tmp = mkdtempSync(join(tmpdir(), "graphrefly-react-export-smoke-"));
 
@@ -83,6 +153,13 @@ import * as reactSdk from "@graphrefly/react";
 import { useNodeInput, useNodeRecord, useNodeValue } from "@graphrefly/ts/adapters/react";
 import { boundaryManifest } from "@graphrefly/ts/inspection/boundary";
 
+const allowedRuntimeRootExports = ${JSON.stringify(allowedRuntimeRootExports)};
+const deniedRootExports = ${JSON.stringify(deniedRootExports)};
+
+assert.deepEqual(Object.keys(reactSdk).sort(), allowedRuntimeRootExports.sort());
+for (const name of deniedRootExports) {
+	assert.equal(Object.hasOwn(reactSdk, name), false);
+}
 assert.equal(reactSdk.useNodeInput, useNodeInput);
 assert.equal(reactSdk.useNodeRecord, useNodeRecord);
 assert.equal(reactSdk.useNodeValue, useNodeValue);
@@ -123,6 +200,13 @@ assert.equal(typeof reactSdk.useA2UIBoundaryDataModelUpdate, "function");
 	useNodeRecord,
 	useNodeValue,
 } from "@graphrefly/react";
+
+${deniedRootExports
+	.map(
+		(name) => `// @ts-expect-error D346/D347 keep ${name} out of the root export.
+import type { ${name} } from "@graphrefly/react";`,
+	)
+	.join("\n")}
 
 void AutoPanel;
 void TopologyFlowPanel;
