@@ -11,6 +11,22 @@ export type {
 } from "@graphrefly/ts/inspection/boundary";
 export { boundaryManifest } from "@graphrefly/ts/inspection/boundary";
 export type {
+	A2UIBoundaryDataModel,
+	A2UIBoundaryDataModelEntry,
+	A2UIBoundaryDataModelOptions,
+	A2UIBoundaryValue,
+	A2UIJsonValue,
+	A2UIUpdateDataModelMessage,
+	A2UIVersion,
+} from "./a2ui.js";
+export {
+	A2UI_VERSION,
+	boundaryManifestToA2UIDataModel,
+	boundaryManifestToA2UIDataModelUpdate,
+	useA2UIBoundaryDataModel,
+	useA2UIBoundaryDataModelUpdate,
+} from "./a2ui.js";
+export type {
 	AutoPanelInputSetter,
 	AutoPanelInputWidget,
 	AutoPanelInputWidgetKey,

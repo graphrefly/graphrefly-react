@@ -24,6 +24,10 @@ adds only React live topology hooks plus reference UI.
 - `AutoPanel` — small reference presentation over the binding primitives, with optional
   caller-supplied trusted widget catalog/resolver props.
 - `TopologyFlowPanel` — live DOM/SVG reference topology sidebar over `graph.describe()`.
+- `useA2UIBoundaryDataModel(graph)` / `useA2UIBoundaryDataModelUpdate(graph, opts)` —
+  fixed-schema A2UI data-model lowering for live boundary values. It preserves
+  GraphReFly SENTINEL/null/non-JSON distinctions and leaves component trees/catalogs to
+  trusted product UI code.
 
 ## Toolchain
 
@@ -42,5 +46,6 @@ Canvas product state, widget-slot pinning, workspace placement, dataPath ownersh
 reactive-layout ownership, measurement-provider policy, registry / app-store, fork +
 one-click-config, BYOK/Nano wiring, OAuth/MCP connectors, relay/push, billing. This package
 is the reusable React live hook/reference UI layer only; its widget catalog is a trusted
-React presentation hook, and its topology panel is DOM-bound reference UI, not generic
-boundary metadata or a pure `GraphSpec → string` renderer.
+React presentation hook, its A2UI helpers are fixed-schema data-model lowering only, and
+its topology panel is DOM-bound reference UI, not generic boundary metadata or a pure
+`GraphSpec → string` renderer.

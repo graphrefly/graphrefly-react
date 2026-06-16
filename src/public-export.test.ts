@@ -12,6 +12,9 @@ import {
 } from "@graphrefly/ts/inspection/boundary";
 import { describe, expect, expectTypeOf, it } from "vitest";
 import {
+	A2UI_VERSION,
+	type A2UIBoundaryDataModel,
+	type A2UIUpdateDataModelMessage,
 	AutoPanel,
 	type AutoPanelInputWidgetProps,
 	type AutoPanelOutputWidgetProps,
@@ -21,8 +24,12 @@ import {
 	type BoundaryNode,
 	type BoundaryRole,
 	boundaryManifest,
+	boundaryManifestToA2UIDataModel,
+	boundaryManifestToA2UIDataModelUpdate,
 	TopologyFlowPanel,
 	type TopologyFlowPanelProps,
+	useA2UIBoundaryDataModel,
+	useA2UIBoundaryDataModelUpdate,
 	useBoundaryManifest,
 	useNodeInput,
 	useNodeRecord,
@@ -41,6 +48,11 @@ describe("public root exports", () => {
 		expect(typeof useBoundaryManifest).toBe("function");
 		expect(typeof AutoPanel).toBe("function");
 		expect(typeof TopologyFlowPanel).toBe("function");
+		expect(A2UI_VERSION).toBe("v0.9.1");
+		expect(typeof boundaryManifestToA2UIDataModel).toBe("function");
+		expect(typeof boundaryManifestToA2UIDataModelUpdate).toBe("function");
+		expect(typeof useA2UIBoundaryDataModel).toBe("function");
+		expect(typeof useA2UIBoundaryDataModelUpdate).toBe("function");
 
 		const manifested = boundaryManifest(graph({ name: "public-export-smoke" }));
 		expect(manifested.inputs.length).toBe(0);
@@ -63,5 +75,11 @@ describe("public root exports", () => {
 
 	it("exports topology flow panel types", () => {
 		expectTypeOf<TopologyFlowPanelProps>().toHaveProperty("graph");
+	});
+
+	it("exports A2UI boundary data-model types", () => {
+		expectTypeOf<A2UIBoundaryDataModel>().toHaveProperty("inputs");
+		expectTypeOf<A2UIBoundaryDataModel>().toHaveProperty("outputs");
+		expectTypeOf<A2UIUpdateDataModelMessage>().toHaveProperty("updateDataModel");
 	});
 });

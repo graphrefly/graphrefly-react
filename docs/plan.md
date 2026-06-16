@@ -33,6 +33,10 @@ proven on the real substrate:
 - **React consumers can inspect live topology visually** (`TopologyFlowPanel`) from the
   TS-owned `describe()` snapshot and `observeTopology()` stream, without copying pure
   renderers or owning Canvas product state.
+- **React consumers can lower live boundary values into an A2UI-style data model**
+  (`useA2UIBoundaryDataModel*`) for fixed-schema surfaces. This follows D347:
+  component trees/catalogs/renderer registries stay in trusted UI/product layers, while
+  GraphReFly boundary values feed `updateDataModel`.
 
 → the moat ("malleable reactive substrate → auto-grown UI") is technically real.
 
@@ -49,6 +53,10 @@ proven on the real substrate:
 See the slice table (`pnpm dashboard`) for live status. Product/runtime layers such as
 capability tags from meta, productionization, registry/app-store, workspace placement, and
 full Canvas ownership remain outside this package unless a slice explicitly lands here.
+Recent design locks narrow those future paths: D348 allows only generic capability refs in
+TS-owned boundary inspection, D344 keeps dynamic A2UI generation/validation in product
+pipelines, D345 keeps durable Workspace/Canvas APIs solution-level, and D346 keeps React
+package productionization lightweight unless focused optional subpaths are introduced.
 
 ## Layering (where code belongs)
 
@@ -60,4 +68,7 @@ full Canvas ownership remain outside this package unless a slice explicitly land
   slots/pinning/topology lens/dataPath/workspace placement.
 - `TopologyFlowPanel` is a DOM-bound reference topology view over `describe()`, not a pure
   renderer and not a Canvas runtime.
+- A2UI support here is fixed-schema data-model lowering only. Dynamic schema generation,
+  catalog negotiation, renderer registries, and validation loops belong above this package
+  under D344 unless a future slice explicitly locks a focused optional surface here.
 - registry / app-store / fork / relay / BYOK — the **product** repo, not here.

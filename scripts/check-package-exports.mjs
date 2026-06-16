@@ -90,11 +90,19 @@ assert.equal(reactSdk.boundaryManifest, boundaryManifest);
 assert.equal(typeof reactSdk.useBoundaryManifest, "function");
 assert.equal(typeof reactSdk.AutoPanel, "function");
 assert.equal(typeof reactSdk.TopologyFlowPanel, "function");
+assert.equal(reactSdk.A2UI_VERSION, "v0.9.1");
+assert.equal(typeof reactSdk.boundaryManifestToA2UIDataModel, "function");
+assert.equal(typeof reactSdk.boundaryManifestToA2UIDataModelUpdate, "function");
+assert.equal(typeof reactSdk.useA2UIBoundaryDataModel, "function");
+assert.equal(typeof reactSdk.useA2UIBoundaryDataModelUpdate, "function");
 	`,
 	);
 	writeFileSync(
 		join(tmp, "types-smoke.mts"),
 		`import {
+		A2UI_VERSION,
+		type A2UIBoundaryDataModel,
+		type A2UIUpdateDataModelMessage,
 		AutoPanel,
 		type AutoPanelInputWidgetProps,
 		type AutoPanelOutputWidgetProps,
@@ -106,6 +114,10 @@ assert.equal(typeof reactSdk.TopologyFlowPanel, "function");
 			TopologyFlowPanel,
 			type TopologyFlowPanelProps,
 		boundaryManifest,
+	boundaryManifestToA2UIDataModel,
+	boundaryManifestToA2UIDataModelUpdate,
+	useA2UIBoundaryDataModel,
+	useA2UIBoundaryDataModelUpdate,
 	useBoundaryManifest,
 	useNodeInput,
 	useNodeRecord,
@@ -114,7 +126,12 @@ assert.equal(typeof reactSdk.TopologyFlowPanel, "function");
 
 void AutoPanel;
 void TopologyFlowPanel;
+void A2UI_VERSION;
 void boundaryManifest;
+void boundaryManifestToA2UIDataModel;
+void boundaryManifestToA2UIDataModelUpdate;
+void useA2UIBoundaryDataModel;
+void useA2UIBoundaryDataModelUpdate;
 void useBoundaryManifest;
 void useNodeInput;
 void useNodeRecord;
@@ -128,6 +145,8 @@ void useNodeValue;
 		declare const catalog: AutoPanelWidgetCatalog;
 		declare const resolverContext: AutoPanelWidgetResolverContext;
 		declare const topologyFlowProps: TopologyFlowPanelProps;
+		declare const a2uiModel: A2UIBoundaryDataModel;
+		declare const a2uiUpdate: A2UIUpdateDataModelMessage;
 		void role;
 		void node;
 		void inputProps;
@@ -135,6 +154,8 @@ void useNodeValue;
 		void catalog;
 		void resolverContext;
 		void topologyFlowProps;
+		void a2uiModel;
+		void a2uiUpdate;
 		`,
 	);
 	writeFileSync(
