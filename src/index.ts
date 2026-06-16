@@ -13,16 +13,28 @@ export type {
 } from "@graphrefly/ts/inspection/boundary";
 export { boundaryManifest } from "@graphrefly/ts/inspection/boundary";
 export type {
+	A2UIBoundaryCapability,
+	A2UIBoundaryCapabilityDataModel,
+	A2UIBoundaryCapabilityDataModelEntry,
+	A2UIBoundaryCapabilityDataModelOptions,
+	A2UIBoundaryCapabilityDataModelUpdateMessage,
 	A2UIBoundaryDataModel,
 	A2UIBoundaryDataModelEntry,
 	A2UIBoundaryDataModelOptions,
 	A2UIBoundaryValue,
+	A2UICapabilityAdmission,
+	A2UICapabilityResolution,
+	A2UICapabilityResolver,
+	A2UICapabilityResolverContext,
+	A2UICapabilityStatus,
 	A2UIJsonValue,
 	A2UIUpdateDataModelMessage,
 	A2UIVersion,
 } from "./a2ui.js";
 export {
 	A2UI_VERSION,
+	boundaryManifestToA2UICapabilityDataModel,
+	boundaryManifestToA2UICapabilityDataModelUpdate,
 	boundaryManifestToA2UIDataModel,
 	boundaryManifestToA2UIDataModelUpdate,
 	useA2UIBoundaryDataModel,

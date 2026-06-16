@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import {
 	A2UI_VERSION,
 	boundaryManifest,
+	boundaryManifestToA2UICapabilityDataModel,
+	boundaryManifestToA2UICapabilityDataModelUpdate,
 	boundaryManifestToA2UIDataModel,
 	boundaryManifestToA2UIDataModelUpdate,
 	useA2UIBoundaryDataModelUpdate,
@@ -35,6 +37,110 @@ describe("A2UI boundary data-model lowering", () => {
 		expect(msg.updateDataModel.surfaceId).toBe("surface-1");
 		expect(msg.updateDataModel.path).toBe("/graphrefly/boundary");
 		expect(msg.updateDataModel.value.inputs.amount?.value).toEqual({ state: "data", value: 7 });
+	});
+
+	it("lowers capability refs into a separate fixed-schema data model without changing value lowering", () => {
+		const g = graph({ name: "a2ui-capabilities" });
+		const token = g.state("", {
+			name: "token",
+			meta: {
+				boundaryCapabilities: [
+					{ id: "github-oauth", kind: "auth", required: true, sourceRefs: ["github"] },
+				],
+			},
+		});
+		g.derived([token], (value) => value.length, {
+			name: "length",
+			meta: {
+				boundaryCapabilities: [{ id: "repo-config", kind: "config", required: false }],
+			},
+		});
+
+		const manifest = boundaryManifest(g);
+		const valueModel = boundaryManifestToA2UIDataModel(manifest);
+		const capabilityModel = boundaryManifestToA2UICapabilityDataModel(manifest);
+
+		expect(valueModel.inputs.token).toEqual({
+			name: "token",
+			nodeType: "state",
+			role: "input",
+			value: { state: "data", value: "" },
+		});
+		expect(Object.keys(valueModel.inputs.token ?? {})).not.toContain("capabilities");
+		expect(capabilityModel.boundaries.token).toEqual({
+			name: "token",
+			role: "input",
+			capabilities: [
+				{
+					ref: {
+						id: "github-oauth",
+						kind: "auth",
+						required: true,
+						sourceRefs: ["github"],
+					},
+				},
+			],
+		});
+		expect(capabilityModel.boundaries.length).toEqual({
+			name: "length",
+			role: "output",
+			capabilities: [
+				{
+					ref: {
+						id: "repo-config",
+						kind: "config",
+						required: false,
+					},
+				},
+			],
+		});
+	});
+
+	it("lets trusted callers add only minimal capability status/admission facts to A2UI updates", () => {
+		const g = graph({ name: "a2ui-capability-status" });
+		g.state("draft", {
+			name: "repo",
+			meta: {
+				boundaryCapabilities: [
+					{ id: "repo-auth", kind: "auth", required: true, sourceRefs: ["repo"] },
+					{ id: "repo-config", kind: "config", required: false },
+				],
+			},
+		});
+
+		const msg = boundaryManifestToA2UICapabilityDataModelUpdate(boundaryManifest(g), {
+			resolver: ({ capability, entry }) => {
+				expect(entry.name).toBe("repo");
+				if (capability.id === "repo-auth") return { admission: "block", status: "unavailable" };
+				return "ready";
+			},
+			surfaceId: "surface-capabilities",
+		});
+
+		expect(msg.version).toBe(A2UI_VERSION);
+		expect(msg.updateDataModel.path).toBe("/graphrefly/boundary/capabilities");
+		expect(msg.updateDataModel.surfaceId).toBe("surface-capabilities");
+		expect(msg.updateDataModel.value.boundaries.repo?.capabilities).toEqual([
+			{
+				ref: {
+					id: "repo-auth",
+					kind: "auth",
+					required: true,
+					sourceRefs: ["repo"],
+				},
+				status: "unavailable",
+				admission: "block",
+			},
+			{
+				ref: {
+					id: "repo-config",
+					kind: "config",
+					required: false,
+				},
+				status: "ready",
+			},
+		]);
+		expect(JSON.stringify(msg)).not.toMatch(/provider|formSchema|oauthUrl|actionLabel/i);
 	});
 
 	it("keeps a fixed-schema A2UI data-model update live as graph values change", async () => {

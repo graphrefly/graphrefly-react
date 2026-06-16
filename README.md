@@ -30,6 +30,11 @@ root-only until a focused optional subpath is reviewed for any heavy/product-sha
   fixed-schema A2UI data-model lowering for live boundary values. It preserves
   GraphReFly SENTINEL/null/non-JSON distinctions and leaves component trees/catalogs to
   trusted product UI code.
+- `boundaryManifestToA2UICapabilityDataModel(manifest, opts)` /
+  `boundaryManifestToA2UICapabilityDataModelUpdate(manifest, opts)` — separate
+  fixed-schema A2UI capability projection over generic `BoundaryCapabilityRef` data.
+  Callers may add minimal status/admission facts; OAuth flows, provider registries, config
+  forms, setup actions, and hard admission enforcement stay in product/Canvas/solution code.
 
 ## Toolchain
 

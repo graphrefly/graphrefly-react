@@ -20,7 +20,15 @@ import { describe, expect, expectTypeOf, it } from "vitest";
 import * as reactRoot from "./index.js";
 import {
 	A2UI_VERSION,
+	type A2UIBoundaryCapability,
+	type A2UIBoundaryCapabilityDataModel,
+	type A2UIBoundaryCapabilityDataModelUpdateMessage,
 	type A2UIBoundaryDataModel,
+	type A2UICapabilityAdmission,
+	type A2UICapabilityResolution,
+	type A2UICapabilityResolver,
+	type A2UICapabilityResolverContext,
+	type A2UICapabilityStatus,
 	type A2UIUpdateDataModelMessage,
 	AutoPanel,
 	type AutoPanelCapabilityRenderer,
@@ -39,6 +47,8 @@ import {
 	type BoundaryNode,
 	type BoundaryRole,
 	boundaryManifest,
+	boundaryManifestToA2UICapabilityDataModel,
+	boundaryManifestToA2UICapabilityDataModelUpdate,
 	boundaryManifestToA2UIDataModel,
 	boundaryManifestToA2UIDataModelUpdate,
 	TopologyFlowPanel,
@@ -67,6 +77,8 @@ const allowedRuntimeRootExports = [
 	"TopologyFlowPanel",
 	"VERSION",
 	"boundaryManifest",
+	"boundaryManifestToA2UICapabilityDataModel",
+	"boundaryManifestToA2UICapabilityDataModelUpdate",
 	"boundaryManifestToA2UIDataModel",
 	"boundaryManifestToA2UIDataModelUpdate",
 	"useA2UIBoundaryDataModel",
@@ -105,6 +117,8 @@ describe("public root exports", () => {
 		expect(typeof AutoPanel).toBe("function");
 		expect(typeof TopologyFlowPanel).toBe("function");
 		expect(A2UI_VERSION).toBe("v0.9.1");
+		expect(typeof boundaryManifestToA2UICapabilityDataModel).toBe("function");
+		expect(typeof boundaryManifestToA2UICapabilityDataModelUpdate).toBe("function");
 		expect(typeof boundaryManifestToA2UIDataModel).toBe("function");
 		expect(typeof boundaryManifestToA2UIDataModelUpdate).toBe("function");
 		expect(typeof useA2UIBoundaryDataModel).toBe("function");
@@ -160,6 +174,25 @@ describe("public root exports", () => {
 		expectTypeOf<A2UIBoundaryDataModel>().toHaveProperty("inputs");
 		expectTypeOf<A2UIBoundaryDataModel>().toHaveProperty("outputs");
 		expectTypeOf<A2UIUpdateDataModelMessage>().toHaveProperty("updateDataModel");
+	});
+
+	it("exports A2UI capability data-model types without product registries", () => {
+		expectTypeOf<A2UIBoundaryCapability>()
+			.toHaveProperty("ref")
+			.toEqualTypeOf<TsBoundaryCapabilityRef>();
+		expectTypeOf<A2UIBoundaryCapabilityDataModel>().toHaveProperty("boundaries");
+		expectTypeOf<A2UIBoundaryCapabilityDataModelUpdateMessage>().toHaveProperty("updateDataModel");
+		expectTypeOf<A2UICapabilityStatus>().toEqualTypeOf<
+			"pending" | "ready" | "unknown" | "unavailable"
+		>();
+		expectTypeOf<A2UICapabilityAdmission>().toEqualTypeOf<"allow" | "block">();
+		expectTypeOf<A2UICapabilityResolverContext>()
+			.toHaveProperty("capability")
+			.toEqualTypeOf<TsBoundaryCapabilityRef>();
+		expectTypeOf<A2UICapabilityResolution>().toHaveProperty("admission");
+		expectTypeOf<A2UICapabilityResolver>().returns.toEqualTypeOf<
+			A2UICapabilityResolution | A2UICapabilityStatus | null | undefined
+		>();
 	});
 
 	it("keeps the root runtime export surface D346-light", () => {

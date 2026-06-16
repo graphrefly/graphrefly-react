@@ -1,6 +1,7 @@
 import type { Graph } from "@graphrefly/ts";
 import { nodeSnapshot, subscribeNodeValues } from "@graphrefly/ts/adapters";
 import {
+	type BoundaryCapabilityRef,
 	type BoundaryManifest,
 	type BoundaryNode,
 	boundaryManifest,
@@ -35,6 +36,39 @@ export interface A2UIBoundaryDataModel {
 	outputs: Record<string, A2UIBoundaryDataModelEntry>;
 }
 
+export type A2UICapabilityStatus = "pending" | "ready" | "unknown" | "unavailable";
+export type A2UICapabilityAdmission = "allow" | "block";
+
+export interface A2UIBoundaryCapability {
+	ref: BoundaryCapabilityRef;
+	status?: A2UICapabilityStatus;
+	admission?: A2UICapabilityAdmission;
+}
+
+export interface A2UIBoundaryCapabilityDataModelEntry {
+	capabilities: A2UIBoundaryCapability[];
+	name: string;
+	role: "input" | "output";
+}
+
+export interface A2UIBoundaryCapabilityDataModel {
+	boundaries: Record<string, A2UIBoundaryCapabilityDataModelEntry>;
+}
+
+export interface A2UICapabilityResolverContext {
+	capability: BoundaryCapabilityRef;
+	entry: BoundaryNode;
+}
+
+export interface A2UICapabilityResolution {
+	admission?: A2UICapabilityAdmission;
+	status?: A2UICapabilityStatus;
+}
+
+export type A2UICapabilityResolver = (
+	context: A2UICapabilityResolverContext,
+) => A2UICapabilityResolution | A2UICapabilityStatus | null | undefined;
+
 export interface A2UIUpdateDataModelMessage {
 	version: A2UIVersion;
 	updateDataModel: {
@@ -49,7 +83,23 @@ export interface A2UIBoundaryDataModelOptions {
 	surfaceId: string;
 }
 
+export interface A2UIBoundaryCapabilityDataModelOptions {
+	path?: string;
+	resolver?: A2UICapabilityResolver;
+	surfaceId: string;
+}
+
+export interface A2UIBoundaryCapabilityDataModelUpdateMessage {
+	version: A2UIVersion;
+	updateDataModel: {
+		path: string;
+		surfaceId: string;
+		value: A2UIBoundaryCapabilityDataModel;
+	};
+}
+
 const DEFAULT_A2UI_BOUNDARY_PATH = "/graphrefly/boundary";
+const DEFAULT_A2UI_BOUNDARY_CAPABILITIES_PATH = "/graphrefly/boundary/capabilities";
 
 export function boundaryManifestToA2UIDataModel(manifest: BoundaryManifest): A2UIBoundaryDataModel {
 	return {
@@ -68,6 +118,34 @@ export function boundaryManifestToA2UIDataModelUpdate(
 			path: options.path ?? DEFAULT_A2UI_BOUNDARY_PATH,
 			surfaceId: options.surfaceId,
 			value: boundaryManifestToA2UIDataModel(manifest),
+		},
+	};
+}
+
+export function boundaryManifestToA2UICapabilityDataModel(
+	manifest: BoundaryManifest,
+	options: Pick<A2UIBoundaryCapabilityDataModelOptions, "resolver"> = {},
+): A2UIBoundaryCapabilityDataModel {
+	return {
+		boundaries: capabilityEntriesToRecord(
+			[...manifest.inputs, ...manifest.outputs],
+			options.resolver,
+		),
+	};
+}
+
+export function boundaryManifestToA2UICapabilityDataModelUpdate(
+	manifest: BoundaryManifest,
+	options: A2UIBoundaryCapabilityDataModelOptions,
+): A2UIBoundaryCapabilityDataModelUpdateMessage {
+	return {
+		version: A2UI_VERSION,
+		updateDataModel: {
+			path: options.path ?? DEFAULT_A2UI_BOUNDARY_CAPABILITIES_PATH,
+			surfaceId: options.surfaceId,
+			value: boundaryManifestToA2UICapabilityDataModel(manifest, {
+				resolver: options.resolver,
+			}),
 		},
 	};
 }
@@ -142,6 +220,52 @@ function entriesToRecord(
 		};
 	}
 	return out;
+}
+
+function capabilityEntriesToRecord(
+	entries: readonly BoundaryNode[],
+	resolver: A2UICapabilityResolver | undefined,
+): Record<string, A2UIBoundaryCapabilityDataModelEntry> {
+	const out: Record<string, A2UIBoundaryCapabilityDataModelEntry> = {};
+	for (const entry of [...entries].sort((a, b) => a.name.localeCompare(b.name))) {
+		const capabilities = entry.capabilities?.map((capability) =>
+			a2uiCapability(entry, capability, resolver),
+		);
+		if (capabilities === undefined || capabilities.length === 0) continue;
+		out[entry.name] = {
+			capabilities,
+			name: entry.name,
+			role: entry.role,
+		};
+	}
+	return out;
+}
+
+function a2uiCapability(
+	entry: BoundaryNode,
+	capability: BoundaryCapabilityRef,
+	resolver: A2UICapabilityResolver | undefined,
+): A2UIBoundaryCapability {
+	const resolved = resolver?.({ capability, entry });
+	const ref = {
+		id: capability.id,
+		kind: capability.kind,
+		required: capability.required,
+		...(capability.sourceRefs === undefined ? {} : { sourceRefs: [...capability.sourceRefs] }),
+	};
+	if (
+		resolved === "pending" ||
+		resolved === "ready" ||
+		resolved === "unknown" ||
+		resolved === "unavailable"
+	) {
+		return { ref, status: resolved };
+	}
+	return {
+		ref,
+		...(resolved?.status === undefined ? {} : { status: resolved.status }),
+		...(resolved?.admission === undefined ? {} : { admission: resolved.admission }),
+	};
 }
 
 function encodeBoundaryValue(value: unknown): A2UIBoundaryValue {

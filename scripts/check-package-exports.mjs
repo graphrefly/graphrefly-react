@@ -27,6 +27,8 @@ const allowedRuntimeRootExports = [
 	"TopologyFlowPanel",
 	"VERSION",
 	"boundaryManifest",
+	"boundaryManifestToA2UICapabilityDataModel",
+	"boundaryManifestToA2UICapabilityDataModelUpdate",
 	"boundaryManifestToA2UIDataModel",
 	"boundaryManifestToA2UIDataModelUpdate",
 	"useA2UIBoundaryDataModel",
@@ -168,6 +170,8 @@ assert.equal(typeof reactSdk.useBoundaryManifest, "function");
 assert.equal(typeof reactSdk.AutoPanel, "function");
 assert.equal(typeof reactSdk.TopologyFlowPanel, "function");
 assert.equal(reactSdk.A2UI_VERSION, "v0.9.1");
+assert.equal(typeof reactSdk.boundaryManifestToA2UICapabilityDataModel, "function");
+assert.equal(typeof reactSdk.boundaryManifestToA2UICapabilityDataModelUpdate, "function");
 assert.equal(typeof reactSdk.boundaryManifestToA2UIDataModel, "function");
 assert.equal(typeof reactSdk.boundaryManifestToA2UIDataModelUpdate, "function");
 assert.equal(typeof reactSdk.useA2UIBoundaryDataModel, "function");
@@ -178,7 +182,15 @@ assert.equal(typeof reactSdk.useA2UIBoundaryDataModelUpdate, "function");
 		join(tmp, "types-smoke.mts"),
 		`import {
 		A2UI_VERSION,
+		type A2UIBoundaryCapability,
+		type A2UIBoundaryCapabilityDataModel,
+		type A2UIBoundaryCapabilityDataModelUpdateMessage,
 		type A2UIBoundaryDataModel,
+		type A2UICapabilityAdmission,
+		type A2UICapabilityResolution,
+		type A2UICapabilityResolver,
+		type A2UICapabilityResolverContext,
+		type A2UICapabilityStatus,
 		type A2UIUpdateDataModelMessage,
 		AutoPanel,
 		type AutoPanelInputWidgetProps,
@@ -189,8 +201,10 @@ assert.equal(typeof reactSdk.useA2UIBoundaryDataModelUpdate, "function");
 			type BoundaryNode,
 			type BoundaryRole,
 			TopologyFlowPanel,
-			type TopologyFlowPanelProps,
+		type TopologyFlowPanelProps,
 		boundaryManifest,
+	boundaryManifestToA2UICapabilityDataModel,
+	boundaryManifestToA2UICapabilityDataModelUpdate,
 	boundaryManifestToA2UIDataModel,
 	boundaryManifestToA2UIDataModelUpdate,
 	useA2UIBoundaryDataModel,
@@ -212,6 +226,8 @@ void AutoPanel;
 void TopologyFlowPanel;
 void A2UI_VERSION;
 void boundaryManifest;
+void boundaryManifestToA2UICapabilityDataModel;
+void boundaryManifestToA2UICapabilityDataModelUpdate;
 void boundaryManifestToA2UIDataModel;
 void boundaryManifestToA2UIDataModelUpdate;
 void useA2UIBoundaryDataModel;
@@ -229,6 +245,14 @@ void useNodeValue;
 		declare const catalog: AutoPanelWidgetCatalog;
 		declare const resolverContext: AutoPanelWidgetResolverContext;
 		declare const topologyFlowProps: TopologyFlowPanelProps;
+		declare const a2uiCapability: A2UIBoundaryCapability;
+		declare const a2uiCapabilityModel: A2UIBoundaryCapabilityDataModel;
+		declare const a2uiCapabilityUpdate: A2UIBoundaryCapabilityDataModelUpdateMessage;
+		declare const a2uiCapabilityStatus: A2UICapabilityStatus;
+		declare const a2uiCapabilityAdmission: A2UICapabilityAdmission;
+		declare const a2uiCapabilityResolution: A2UICapabilityResolution;
+		declare const a2uiCapabilityResolver: A2UICapabilityResolver;
+		declare const a2uiCapabilityResolverContext: A2UICapabilityResolverContext;
 		declare const a2uiModel: A2UIBoundaryDataModel;
 		declare const a2uiUpdate: A2UIUpdateDataModelMessage;
 		void role;
@@ -238,6 +262,14 @@ void useNodeValue;
 		void catalog;
 		void resolverContext;
 		void topologyFlowProps;
+		void a2uiCapability;
+		void a2uiCapabilityModel;
+		void a2uiCapabilityUpdate;
+		void a2uiCapabilityStatus;
+		void a2uiCapabilityAdmission;
+		void a2uiCapabilityResolution;
+		void a2uiCapabilityResolver;
+		void a2uiCapabilityResolverContext;
 		void a2uiModel;
 		void a2uiUpdate;
 		`,
