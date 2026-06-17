@@ -208,13 +208,16 @@ describe("public root exports", () => {
 		expect(packageJson.files).toEqual(["dist", "README.md", "package.json"]);
 		expect(packageJson.sideEffects).toBe(false);
 		expect(packageJson.peerDependencies).toMatchObject({
-			"@graphrefly/ts": ">=0.0.0 <1.0.0",
+			"@graphrefly/ts": ">=0.0.1 <1.0.0",
 			react: "^18.0.0 || ^19.0.0",
 			"react-dom": "^18.0.0 || ^19.0.0",
 		});
 		const tsDevDependency = packageJson.devDependencies?.["@graphrefly/ts"];
-		expect(tsDevDependency?.startsWith("link:")).toBe(true);
-		expect(existsSync(resolve(ROOT, tsDevDependency?.slice("link:".length) ?? ""))).toBe(true);
+		expect(typeof tsDevDependency).toBe("string");
+		const tsPackagePath = tsDevDependency?.startsWith("link:")
+			? resolve(ROOT, tsDevDependency.slice("link:".length))
+			: join(ROOT, "node_modules", "@graphrefly", "ts");
+		expect(existsSync(tsPackagePath)).toBe(true);
 
 		const indexSource = readFileSync(join(SRC_DIR, "index.ts"), "utf8");
 		const imports = [

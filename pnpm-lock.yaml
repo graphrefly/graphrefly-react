@@ -12,8 +12,8 @@ importers:
         specifier: 2.4.6
         version: 2.4.6
       '@graphrefly/ts':
-        specifier: link:../graphrefly-ts/packages/ts
-        version: link:../graphrefly-ts/packages/ts
+        specifier: ^0.0.1
+        version: 0.0.1(react@19.2.6)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -187,6 +187,26 @@ packages:
       '@noble/hashes': ^1.8.0 || ^2.0.0
     peerDependenciesMeta:
       '@noble/hashes':
+        optional: true
+
+  '@graphrefly/ts@0.0.1':
+    resolution: {integrity: sha512-r5AroiSZi2wFocyCdQ1zZBoS8aIaDstvqIwn1JJCceesOWpZCxT2jxjM3egwlCLC6B7zb6OMkdS+LzbwN3bKsA==}
+    peerDependencies:
+      canvas: ^3.2.3
+      react: ^18.0.0 || ^19.0.0
+      solid-js: ^1.9.0
+      svelte: ^5.0.0
+      vue: ^3.5.0
+    peerDependenciesMeta:
+      canvas:
+        optional: true
+      react:
+        optional: true
+      solid-js:
+        optional: true
+      svelte:
+        optional: true
+      vue:
         optional: true
 
   '@jridgewell/sourcemap-codec@1.5.5':
@@ -907,6 +927,10 @@ snapshots:
     optional: true
 
   '@exodus/bytes@1.15.1': {}
+
+  '@graphrefly/ts@0.0.1(react@19.2.6)':
+    optionalDependencies:
+      react: 19.2.6
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
 

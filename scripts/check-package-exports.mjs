@@ -17,7 +17,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const TSC = join(ROOT, "node_modules", ".bin", "tsc");
 const packageJson = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
 const peerLinks = {
-	"@graphrefly/ts": localLinkedDependency("@graphrefly/ts"),
+	"@graphrefly/ts": resolveDevDependencyPath("@graphrefly/ts"),
 	react: join(ROOT, "node_modules", "react"),
 	"react-dom": join(ROOT, "node_modules", "react-dom"),
 };
@@ -62,12 +62,15 @@ function assert(condition, message) {
 	if (!condition) fail(message);
 }
 
-function localLinkedDependency(name) {
+function resolveDevDependencyPath(name) {
 	const spec = packageJson.devDependencies?.[name];
-	if (typeof spec !== "string" || !spec.startsWith("link:")) {
-		fail(`${name} devDependency must stay a local link while this sibling package is unpublished`);
+	if (typeof spec !== "string") {
+		fail(`${name} devDependency must be declared`);
 	}
-	return resolve(ROOT, spec.slice("link:".length));
+	if (spec.startsWith("link:")) {
+		return resolve(ROOT, spec.slice("link:".length));
+	}
+	return join(ROOT, "node_modules", ...name.split("/"));
 }
 
 function errorOutput(err) {
@@ -105,14 +108,13 @@ assert(
 );
 assert(packageJson.sideEffects === false, "sideEffects must stay false");
 assert(
-	packageJson.peerDependencies?.["@graphrefly/ts"] === ">=0.0.0 <1.0.0",
+	packageJson.peerDependencies?.["@graphrefly/ts"] === ">=0.0.1 <1.0.0",
 	"@graphrefly/ts peerDependency must be a versioned pre-1.0 range",
 );
 assert(
 	typeof packageJson.devDependencies?.["@graphrefly/ts"] === "string" &&
-		packageJson.devDependencies["@graphrefly/ts"].startsWith("link:") &&
 		existsSync(peerLinks["@graphrefly/ts"]),
-	"local unpublished package must retain a resolvable @graphrefly/ts devDependency link",
+	"@graphrefly/ts devDependency must resolve to an installed package",
 );
 assert(
 	packageJson.peerDependencies?.react === "^18.0.0 || ^19.0.0" &&
