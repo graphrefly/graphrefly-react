@@ -1,4 +1,4 @@
-import type { Graph } from "@graphrefly/ts";
+import type { Graph, Node } from "@graphrefly/ts";
 import { nodeSnapshot, subscribeNodeValues } from "@graphrefly/ts/adapters";
 import {
 	type BoundaryCapabilityRef,
@@ -175,18 +175,33 @@ export function useA2UIBoundaryDataModelUpdate(
 }
 
 function boundaryDataModelStore(graph: Graph) {
+	const listeners = new Set<() => void>();
+	const nodeSubscriptions = new Map<Node<unknown>, () => void>();
+	let unsubscribeTopology: (() => void) | undefined;
+	const notify = () => {
+		for (const listener of listeners) listener();
+	};
+	const start = () => {
+		syncBoundaryNodeSubscriptions(graph, nodeSubscriptions, notify);
+		unsubscribeTopology = graph.observeTopology().subscribe(() => {
+			syncBoundaryNodeSubscriptions(graph, nodeSubscriptions, notify);
+			notify();
+		});
+	};
+	const stop = () => {
+		unsubscribeTopology?.();
+		unsubscribeTopology = undefined;
+		for (const unsubscribe of nodeSubscriptions.values()) unsubscribe();
+		nodeSubscriptions.clear();
+	};
 	return {
 		getSnapshot: () => boundaryDataModelSnapshot(graph),
 		subscribe(onStoreChange: () => void) {
-			let unsubscribeNodes = subscribeBoundaryNodes(graph, onStoreChange);
-			const unsubscribeTopology = graph.observeTopology().subscribe(() => {
-				unsubscribeNodes();
-				unsubscribeNodes = subscribeBoundaryNodes(graph, onStoreChange);
-				onStoreChange();
-			});
+			listeners.add(onStoreChange);
+			if (listeners.size === 1) start();
 			return () => {
-				unsubscribeTopology();
-				unsubscribeNodes();
+				listeners.delete(onStoreChange);
+				if (listeners.size === 0) stop();
 			};
 		},
 	};
@@ -196,15 +211,24 @@ function boundaryDataModelSnapshot(graph: Graph): string {
 	return JSON.stringify(boundaryManifestToA2UIDataModel(boundaryManifest(graph)));
 }
 
-function subscribeBoundaryNodes(graph: Graph, onStoreChange: () => void): () => void {
+function syncBoundaryNodeSubscriptions(
+	graph: Graph,
+	subscriptions: Map<Node<unknown>, () => void>,
+	onStoreChange: () => void,
+): void {
 	const manifest = boundaryManifest(graph);
-	const entries = [...manifest.inputs, ...manifest.outputs];
-	const unsubscribes = entries.map((entry) =>
-		subscribeNodeValues(entry.node, onStoreChange, { changesOnly: false }),
+	const nextNodes = new Set<Node<unknown>>(
+		[...manifest.inputs, ...manifest.outputs].map((entry) => entry.node),
 	);
-	return () => {
-		for (const unsubscribe of unsubscribes) unsubscribe();
-	};
+	for (const [node, unsubscribe] of subscriptions) {
+		if (nextNodes.has(node)) continue;
+		unsubscribe();
+		subscriptions.delete(node);
+	}
+	for (const node of nextNodes) {
+		if (subscriptions.has(node)) continue;
+		subscriptions.set(node, subscribeNodeValues(node, onStoreChange, { changesOnly: true }));
+	}
 }
 
 function entriesToRecord(
