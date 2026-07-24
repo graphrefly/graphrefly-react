@@ -15,10 +15,29 @@ import { dirname, join, resolve } from "node:path";
 const ROOT = resolve(import.meta.dirname, "..");
 const packageRoot = resolve(process.argv[2] ?? ".");
 const packageJson = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8"));
-const expectedExports = {
-	"@graphrefly/solid": ["createNodeInput", "createNodeRecord", "createNodeValue"],
-	"@graphrefly/svelte": ["nodeReadable", "nodeRecord", "nodeWritable"],
-	"@graphrefly/vue": ["useNodeInput", "useNodeRecord", "useNodeValue"],
+const expectedEntries = {
+	"@graphrefly/nestjs": {
+		".": ["GraphReq", "createNestGraphBoundaryRunner", "fromNestReq", "getNestBoundaryBindings"],
+		"./microservices": ["GraphMessage", "createGraphMessageBridge", "provideGraphMessageProviders"],
+		"./native": [
+			"createGraphExceptionFilter",
+			"createNestGraphGuardAwaitScope",
+			"provideGraphNativeProviders",
+		],
+		"./websockets": ["GraphWs", "createGraphWsBridge", "provideGraphWsProviders"],
+	},
+	"@graphrefly/reactive-layout-node-canvas": {
+		".": ["nodeCanvasPackageTextMeasurements"],
+	},
+	"@graphrefly/solid": {
+		".": ["createNodeInput", "createNodeRecord", "createNodeValue"],
+	},
+	"@graphrefly/svelte": {
+		".": ["nodeReadable", "nodeRecord", "nodeWritable"],
+	},
+	"@graphrefly/vue": {
+		".": ["useNodeInput", "useNodeRecord", "useNodeValue"],
+	},
 }[packageJson.name];
 
 function fail(message) {
@@ -35,10 +54,10 @@ function resolveInstalledPackage(name) {
 	if (existsSync(local)) return local;
 	const root = join(ROOT, "node_modules", ...segments);
 	if (existsSync(root)) return root;
-	fail(`peer package is not installed: ${name}`);
+	return undefined;
 }
 
-assert(expectedExports, `unknown ecosystem package: ${packageJson.name}`);
+assert(expectedEntries, `unknown ecosystem package: ${packageJson.name}`);
 assert(packageJson.dependencies === undefined, "package must not declare runtime dependencies");
 assert(
 	packageJson.optionalDependencies === undefined,
@@ -46,15 +65,26 @@ assert(
 );
 assert(packageJson.sideEffects === false, "sideEffects must be false");
 
-const rootExport = packageJson.exports?.["."];
-for (const [label, target] of [
-	["ESM", rootExport?.import?.default],
-	["CJS", rootExport?.require?.default],
-	["ESM DTS", rootExport?.import?.types],
-	["CJS DTS", rootExport?.require?.types],
-]) {
-	assert(typeof target === "string", `${label} export target must be declared`);
-	assert(existsSync(join(packageRoot, target)), `${label} export target is missing: ${target}`);
+assert(
+	JSON.stringify(Object.keys(packageJson.exports ?? {}).sort()) ===
+		JSON.stringify(Object.keys(expectedEntries).sort()),
+	"package export keys do not match the reviewed entry set",
+);
+for (const [subpath, expectedExports] of Object.entries(expectedEntries)) {
+	const entry = packageJson.exports?.[subpath];
+	for (const [label, target] of [
+		["ESM", entry?.import?.default],
+		["CJS", entry?.require?.default],
+		["ESM DTS", entry?.import?.types],
+		["CJS DTS", entry?.require?.types],
+	]) {
+		assert(typeof target === "string", `${subpath} ${label} export target must be declared`);
+		assert(
+			existsSync(join(packageRoot, target)),
+			`${subpath} ${label} export target is missing: ${target}`,
+		);
+	}
+	assert(expectedExports.length > 0, `${subpath} must declare reviewed runtime exports`);
 }
 
 const tmp = mkdtempSync(join(tmpdir(), "graphrefly-ecosystem-package-"));
@@ -66,6 +96,13 @@ try {
 
 	for (const peerName of Object.keys(packageJson.peerDependencies ?? {})) {
 		const target = resolveInstalledPackage(peerName);
+		if (target === undefined) {
+			assert(
+				packageJson.peerDependenciesMeta?.[peerName]?.optional === true,
+				`required peer package is not installed: ${peerName}`,
+			);
+			continue;
+		}
 		const link = join(tmp, "node_modules", ...peerName.split("/"));
 		mkdirSync(dirname(link), { recursive: true });
 		symlinkSync(target, link, "dir");
@@ -75,15 +112,23 @@ try {
 	writeFileSync(
 		join(tmp, "esm-smoke.mjs"),
 		`import assert from "node:assert/strict";
-import * as sdk from ${JSON.stringify(packageJson.name)};
-assert.deepEqual(Object.keys(sdk).sort(), ${JSON.stringify(expectedExports)}.sort());
+const expectedEntries = ${JSON.stringify(expectedEntries)};
+for (const [subpath, expected] of Object.entries(expectedEntries)) {
+	const specifier = ${JSON.stringify(packageJson.name)} + (subpath === "." ? "" : subpath.slice(1));
+	const sdk = await import(specifier);
+	for (const name of expected) assert.equal(typeof sdk[name] === "function" || sdk[name] !== undefined, true);
+}
 `,
 	);
 	writeFileSync(
 		join(tmp, "cjs-smoke.cjs"),
 		`const assert = require("node:assert/strict");
-const sdk = require(${JSON.stringify(packageJson.name)});
-assert.deepEqual(Object.keys(sdk).sort(), ${JSON.stringify(expectedExports)}.sort());
+const expectedEntries = ${JSON.stringify(expectedEntries)};
+for (const [subpath, expected] of Object.entries(expectedEntries)) {
+	const specifier = ${JSON.stringify(packageJson.name)} + (subpath === "." ? "" : subpath.slice(1));
+	const sdk = require(specifier);
+	for (const name of expected) assert.equal(typeof sdk[name] === "function" || sdk[name] !== undefined, true);
+}
 `,
 	);
 	execFileSync(process.execPath, ["esm-smoke.mjs"], { cwd: tmp, stdio: "pipe" });
