@@ -107,6 +107,11 @@ try {
 		mkdirSync(dirname(link), { recursive: true });
 		symlinkSync(target, link, "dir");
 	}
+	const nodeTypes = resolveInstalledPackage("@types/node");
+	assert(nodeTypes !== undefined, "@types/node is required by the consumer type smoke");
+	const nodeTypesLink = join(tmp, "node_modules", "@types", "node");
+	mkdirSync(dirname(nodeTypesLink), { recursive: true });
+	symlinkSync(nodeTypes, nodeTypesLink, "dir");
 
 	writeFileSync(join(tmp, "package.json"), JSON.stringify({ private: true, type: "module" }));
 	writeFileSync(
@@ -131,8 +136,46 @@ for (const [subpath, expected] of Object.entries(expectedEntries)) {
 }
 `,
 	);
+	const esmTypeImports = [];
+	const cjsTypeImports = [];
+	let entryIndex = 0;
+	for (const [subpath, expected] of Object.entries(expectedEntries)) {
+		const specifier = packageJson.name + (subpath === "." ? "" : subpath.slice(1));
+		const bindings = expected.join(", ");
+		esmTypeImports.push(
+			`import { ${bindings} } from ${JSON.stringify(specifier)};\nvoid [${bindings}];`,
+		);
+		const namespace = `entry${entryIndex}`;
+		cjsTypeImports.push(
+			`import ${namespace} = require(${JSON.stringify(specifier)});\nvoid [${expected
+				.map((name) => `${namespace}.${name}`)
+				.join(", ")}];`,
+		);
+		entryIndex += 1;
+	}
+	writeFileSync(join(tmp, "esm-types.mts"), `${esmTypeImports.join("\n")}\n`);
+	writeFileSync(join(tmp, "cjs-types.cts"), `${cjsTypeImports.join("\n")}\n`);
+	writeFileSync(
+		join(tmp, "tsconfig.json"),
+		JSON.stringify({
+			compilerOptions: {
+				module: "NodeNext",
+				moduleResolution: "NodeNext",
+				noEmit: true,
+				strict: true,
+				skipLibCheck: false,
+				target: "ES2022",
+				types: ["node"],
+			},
+			include: ["esm-types.mts", "cjs-types.cts"],
+		}),
+	);
 	execFileSync(process.execPath, ["esm-smoke.mjs"], { cwd: tmp, stdio: "pipe" });
 	execFileSync(process.execPath, ["cjs-smoke.cjs"], { cwd: tmp, stdio: "pipe" });
+	execFileSync(join(ROOT, "node_modules", ".bin", "tsc"), ["-p", "tsconfig.json"], {
+		cwd: tmp,
+		stdio: "inherit",
+	});
 } finally {
 	rmSync(tmp, { recursive: true, force: true });
 }
