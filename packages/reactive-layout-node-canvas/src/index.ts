@@ -33,7 +33,7 @@ export interface NodeCanvasPackageTextMeasurementsOptions {
 	readonly name?: string;
 }
 
-const requireCanvas = createRequire(`${process.cwd()}/package.json`);
+const requireCanvas = createRequire(typeof __filename === "string" ? __filename : import.meta.url);
 
 function loadCanvasPackage(): NodeCanvasPackageLike {
 	try {

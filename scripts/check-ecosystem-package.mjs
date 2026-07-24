@@ -88,6 +88,7 @@ for (const [subpath, expectedExports] of Object.entries(expectedEntries)) {
 }
 
 const tmp = mkdtempSync(join(tmpdir(), "graphrefly-ecosystem-package-"));
+const externalCwd = mkdtempSync(join(tmpdir(), "graphrefly-ecosystem-external-cwd-"));
 try {
 	const packageInstall = join(tmp, "node_modules", ...packageJson.name.split("/"));
 	mkdirSync(packageInstall, { recursive: true });
@@ -112,6 +113,24 @@ try {
 	const nodeTypesLink = join(tmp, "node_modules", "@types", "node");
 	mkdirSync(dirname(nodeTypesLink), { recursive: true });
 	symlinkSync(nodeTypes, nodeTypesLink, "dir");
+	if (packageJson.name === "@graphrefly/reactive-layout-node-canvas") {
+		const canvasInstall = join(tmp, "node_modules", "canvas");
+		mkdirSync(canvasInstall, { recursive: true });
+		writeFileSync(
+			join(canvasInstall, "package.json"),
+			JSON.stringify({ name: "canvas", version: "3.2.3", main: "index.cjs" }),
+		);
+		writeFileSync(
+			join(canvasInstall, "index.cjs"),
+			`exports.createCanvas = () => ({
+	getContext: () => ({
+		font: "",
+		measureText: (text) => ({ width: text.length * 7 }),
+	}),
+});
+`,
+		);
+	}
 
 	writeFileSync(join(tmp, "package.json"), JSON.stringify({ private: true, type: "module" }));
 	writeFileSync(
@@ -176,8 +195,32 @@ for (const [subpath, expected] of Object.entries(expectedEntries)) {
 		cwd: tmp,
 		stdio: "inherit",
 	});
+	if (packageJson.name === "@graphrefly/reactive-layout-node-canvas") {
+		writeFileSync(
+			join(tmp, "node-canvas-lazy.mjs"),
+			`import assert from "node:assert/strict";
+import { graph } from "@graphrefly/ts";
+import { nodeCanvasPackageTextMeasurements } from "@graphrefly/reactive-layout-node-canvas";
+const g = graph();
+const measured = nodeCanvasPackageTextMeasurements({
+	graph: g,
+	text: g.state("abc"),
+	font: g.state("10px test"),
+});
+const messages = [];
+const unsubscribe = measured.subscribe((message) => messages.push(message));
+assert.match(JSON.stringify(messages), /"width":21/);
+unsubscribe();
+`,
+		);
+		execFileSync(process.execPath, [join(tmp, "node-canvas-lazy.mjs")], {
+			cwd: externalCwd,
+			stdio: "pipe",
+		});
+	}
 } finally {
 	rmSync(tmp, { recursive: true, force: true });
+	rmSync(externalCwd, { recursive: true, force: true });
 }
 
 console.log(`check-ecosystem-package: ${packageJson.name} ESM/CJS/DTS smoke passed`);
