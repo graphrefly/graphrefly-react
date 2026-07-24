@@ -19,7 +19,6 @@ const packageJson = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"))
 const peerLinks = {
 	"@graphrefly/ts": resolveDevDependencyPath("@graphrefly/ts"),
 	react: join(ROOT, "node_modules", "react"),
-	"react-dom": join(ROOT, "node_modules", "react-dom"),
 };
 const allowedRuntimeRootExports = [
 	"A2UI_VERSION",
@@ -96,8 +95,11 @@ function validateExportTarget(path, target) {
 }
 
 validateExportTarget("exports.import", packageJson.exports?.["."]?.import);
+validateExportTarget("exports.require", packageJson.exports?.["."]?.require);
 validateExportTarget("exports.default", packageJson.exports?.["."]?.default);
 validateExportTarget("exports.types", packageJson.exports?.["."]?.types);
+assert(packageJson.main === "dist/index.cjs", "main must point to the CommonJS build");
+assert(packageJson.module === "dist/index.js", "module must point to the ESM build");
 assert(
 	JSON.stringify(Object.keys(packageJson.exports ?? {}).sort()) === JSON.stringify(["."]),
 	"exports must expose only the light root entry until a focused subpath is reviewed",
@@ -108,7 +110,7 @@ assert(
 );
 assert(packageJson.sideEffects === false, "sideEffects must stay false");
 assert(
-	packageJson.peerDependencies?.["@graphrefly/ts"] === ">=0.0.1 <1.0.0",
+	packageJson.peerDependencies?.["@graphrefly/ts"] === ">=0.6.2 <1.0.0",
 	"@graphrefly/ts peerDependency must be a versioned pre-1.0 range",
 );
 assert(
@@ -117,9 +119,12 @@ assert(
 	"@graphrefly/ts devDependency must resolve to an installed package",
 );
 assert(
-	packageJson.peerDependencies?.react === "^18.0.0 || ^19.0.0" &&
-		packageJson.peerDependencies?.["react-dom"] === "^18.0.0 || ^19.0.0",
-	"react/react-dom peerDependencies must cover React 18 and 19",
+	packageJson.peerDependencies?.react === "^18.0.0 || ^19.0.0",
+	"react peerDependency must cover React 18 and 19",
+);
+assert(
+	packageJson.peerDependencies?.["react-dom"] === undefined,
+	"react-dom must not be a runtime peer",
 );
 
 const builtIndex = readFileSync(join(ROOT, "dist", "index.js"), "utf8");
@@ -154,7 +159,6 @@ try {
 		join(tmp, "esm-smoke.mjs"),
 		`import assert from "node:assert/strict";
 import * as reactSdk from "@graphrefly/react";
-import { useNodeInput, useNodeRecord, useNodeValue } from "@graphrefly/ts/adapters/react";
 import { boundaryManifest } from "@graphrefly/ts/inspection/boundary";
 
 const allowedRuntimeRootExports = ${JSON.stringify(allowedRuntimeRootExports)};
@@ -164,9 +168,9 @@ assert.deepEqual(Object.keys(reactSdk).sort(), allowedRuntimeRootExports.sort())
 for (const name of deniedRootExports) {
 	assert.equal(Object.hasOwn(reactSdk, name), false);
 }
-assert.equal(reactSdk.useNodeInput, useNodeInput);
-assert.equal(reactSdk.useNodeRecord, useNodeRecord);
-assert.equal(reactSdk.useNodeValue, useNodeValue);
+assert.equal(typeof reactSdk.useNodeInput, "function");
+assert.equal(typeof reactSdk.useNodeRecord, "function");
+assert.equal(typeof reactSdk.useNodeValue, "function");
 assert.equal(reactSdk.boundaryManifest, boundaryManifest);
 assert.equal(typeof reactSdk.useBoundaryManifest, "function");
 assert.equal(typeof reactSdk.AutoPanel, "function");
@@ -179,6 +183,25 @@ assert.equal(typeof reactSdk.boundaryManifestToA2UIDataModelUpdate, "function");
 assert.equal(typeof reactSdk.useA2UIBoundaryDataModel, "function");
 assert.equal(typeof reactSdk.useA2UIBoundaryDataModelUpdate, "function");
 	`,
+	);
+	writeFileSync(
+		join(tmp, "cjs-smoke.cjs"),
+		`const assert = require("node:assert/strict");
+const reactSdk = require("@graphrefly/react");
+
+const allowedRuntimeRootExports = ${JSON.stringify(allowedRuntimeRootExports)};
+const deniedRootExports = ${JSON.stringify(deniedRootExports)};
+
+assert.deepEqual(Object.keys(reactSdk).sort(), allowedRuntimeRootExports.sort());
+for (const name of deniedRootExports) {
+	assert.equal(Object.hasOwn(reactSdk, name), false);
+}
+assert.equal(typeof reactSdk.useNodeInput, "function");
+assert.equal(typeof reactSdk.useNodeRecord, "function");
+assert.equal(typeof reactSdk.useNodeValue, "function");
+assert.equal(typeof reactSdk.AutoPanel, "function");
+assert.equal(typeof reactSdk.TopologyFlowPanel, "function");
+`,
 	);
 	writeFileSync(
 		join(tmp, "types-smoke.mts"),
@@ -297,6 +320,7 @@ void useNodeValue;
 	);
 
 	execFileSync(process.execPath, ["esm-smoke.mjs"], { cwd: tmp, stdio: "pipe" });
+	execFileSync(process.execPath, ["cjs-smoke.cjs"], { cwd: tmp, stdio: "pipe" });
 	execFileSync(TSC, ["-p", "tsconfig.json"], { cwd: tmp, stdio: "pipe" });
 } catch (e) {
 	fail(`${e.message ?? e}\n${errorOutput(e)}`.trim());
@@ -304,4 +328,4 @@ void useNodeValue;
 	rmSync(tmp, { recursive: true, force: true });
 }
 
-console.log("check-package-exports: @graphrefly/react ESM/DTS smoke passed");
+console.log("check-package-exports: @graphrefly/react ESM/CJS/DTS smoke passed");

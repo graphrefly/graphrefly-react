@@ -3,11 +3,6 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { graph } from "@graphrefly/ts";
 import {
-	useNodeInput as tsUseNodeInput,
-	useNodeRecord as tsUseNodeRecord,
-	useNodeValue as tsUseNodeValue,
-} from "@graphrefly/ts/adapters/react";
-import {
 	type BoundaryCapabilityKind as TsBoundaryCapabilityKind,
 	type BoundaryCapabilityRef as TsBoundaryCapabilityRef,
 	type BoundaryManifest as TsBoundaryManifest,
@@ -106,9 +101,9 @@ const deniedRootExports = [
 
 describe("public root exports", () => {
 	it("re-exports TS node hooks and boundary contract by identity", () => {
-		expect(useNodeInput).toBe(tsUseNodeInput);
-		expect(useNodeRecord).toBe(tsUseNodeRecord);
-		expect(useNodeValue).toBe(tsUseNodeValue);
+		expect(typeof useNodeInput).toBe("function");
+		expect(typeof useNodeRecord).toBe("function");
+		expect(typeof useNodeValue).toBe("function");
 		expect(boundaryManifest).toBe(tsBoundaryManifest);
 	});
 
@@ -208,10 +203,10 @@ describe("public root exports", () => {
 		expect(packageJson.files).toEqual(["dist", "README.md", "package.json"]);
 		expect(packageJson.sideEffects).toBe(false);
 		expect(packageJson.peerDependencies).toMatchObject({
-			"@graphrefly/ts": ">=0.0.1 <1.0.0",
+			"@graphrefly/ts": ">=0.6.2 <1.0.0",
 			react: "^18.0.0 || ^19.0.0",
-			"react-dom": "^18.0.0 || ^19.0.0",
 		});
+		expect(packageJson.peerDependencies).not.toHaveProperty("react-dom");
 		const tsDevDependency = packageJson.devDependencies?.["@graphrefly/ts"];
 		expect(typeof tsDevDependency).toBe("string");
 		const tsPackagePath = tsDevDependency?.startsWith("link:")
@@ -228,7 +223,7 @@ describe("public root exports", () => {
 			"./auto-panel.js",
 			"./topology-flow.js",
 			"./use-boundary-manifest.js",
-			"@graphrefly/ts/adapters/react",
+			"./use-node.js",
 			"@graphrefly/ts/inspection/boundary",
 		]);
 		expect(

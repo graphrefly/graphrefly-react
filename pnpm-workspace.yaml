@@ -4,5 +4,6 @@ packages:
   - apps/*
 allowBuilds:
   '@biomejs/biome': true
+  esbuild: true
 minimumReleaseAgeExclude:
-  - '@graphrefly/ts@0.0.1'
+  - '@graphrefly/ts@0.0.1||0.6.2'

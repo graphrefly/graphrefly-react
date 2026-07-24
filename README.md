@@ -17,9 +17,9 @@ root-only until a focused optional subpath is reviewed for any heavy/product-sha
 
 ## Public SDK Surface
 
-- `useNodeValue(node)` — re-export from `@graphrefly/ts/adapters/react`.
-- `useNodeInput(node)` — re-export from `@graphrefly/ts/adapters/react`.
-- `useNodeRecord(keysNode, factory)` — re-export from `@graphrefly/ts/adapters/react`; `factory` must have stable identity.
+- `useNodeValue(node)` — React-owned binding over the framework-neutral `@graphrefly/ts/adapters` store contract.
+- `useNodeInput(node)` — React-owned writable binding; `undefined` remains SENTINEL/no DATA.
+- `useNodeRecord(keysNode, factory)` — React-owned keyed binding; `factory` must have stable identity.
 - `boundaryManifest(graph)` — re-export from `@graphrefly/ts/inspection/boundary`.
 - `useBoundaryManifest(graph)` — React hook that refreshes the manifest on topology changes.
 - `AutoPanel` — small reference presentation over the binding primitives, with optional

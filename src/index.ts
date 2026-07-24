@@ -1,7 +1,6 @@
 // @graphrefly/react — reactive binding + presentation layer for GraphReFly.
-// TS owns framework node bindings and boundary manifests; React owns live hooks and UI.
+// TS owns framework-neutral store bindings and boundary manifests; React owns hooks and UI.
 
-export { useNodeInput, useNodeRecord, useNodeValue } from "@graphrefly/ts/adapters/react";
 export type {
 	BoundaryCapabilityKind,
 	BoundaryCapabilityRef,
@@ -67,5 +66,6 @@ export type {
 } from "./topology-flow.js";
 export { TopologyFlowPanel } from "./topology-flow.js";
 export { useBoundaryManifest } from "./use-boundary-manifest.js";
+export { useNodeInput, useNodeRecord, useNodeValue } from "./use-node.js";
 
 export const VERSION = "0.0.0";

@@ -1,8 +1,8 @@
 import { graph, type Node } from "@graphrefly/ts";
 import type { WritableNode } from "@graphrefly/ts/adapters";
-import { useNodeInput, useNodeRecord, useNodeValue } from "@graphrefly/ts/adapters/react";
 import { act, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { useNodeInput, useNodeRecord, useNodeValue } from "./use-node.js";
 
 // A real graph (no mocks): an input `state` node feeding a `derived` output.
 // This is the minimal "boundary input -> reduce -> boundary output" the

@@ -11,7 +11,6 @@
 // ---------------------------------------------------------------------------
 
 import type { Graph } from "@graphrefly/ts";
-import { useNodeInput, useNodeValue } from "@graphrefly/ts/adapters/react";
 import type {
 	BoundaryCapabilityRef,
 	BoundaryNode,
@@ -20,6 +19,7 @@ import type {
 } from "@graphrefly/ts/inspection/boundary";
 import { type ComponentType, useCallback, useRef } from "react";
 import { useBoundaryManifest } from "./use-boundary-manifest.js";
+import { useNodeInput, useNodeValue } from "./use-node.js";
 
 export type AutoPanelInputWidgetKey = "boolean" | "number" | "text";
 export type AutoPanelOutputWidgetKey = "json" | "null" | "sentinel" | "text";

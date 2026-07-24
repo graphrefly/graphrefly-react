@@ -2,13 +2,14 @@
 	"name": "@graphrefly/react",
 	"version": "0.0.1",
 	"description": "Reactive binding + presentation layer for GraphReFly (React). Currently a binding-core spike on top of @graphrefly/ts.",
-	"main": "dist/index.js",
+	"main": "dist/index.cjs",
 	"module": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js",
+			"require": "./dist/index.cjs",
 			"default": "./dist/index.js"
 		}
 	},
@@ -29,7 +30,7 @@
 		"lint:fix": "biome check --write .",
 		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit",
-		"build": "pnpm run clean && tsc && node scripts/check-package-exports.mjs",
+		"build": "pnpm run clean && tsup src/index.ts --format esm,cjs --dts --clean && node scripts/check-package-exports.mjs",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"dashboard": "node dashboard/build.mjs",
@@ -37,7 +38,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.6",
-		"@graphrefly/ts": "^0.0.1",
+		"@graphrefly/ts": "0.6.2",
 		"@testing-library/dom": "^10.4.1",
 		"@testing-library/react": "^16.3.2",
 		"@types/node": "^25.5.0",
@@ -46,12 +47,12 @@
 		"jsdom": "^29.1.1",
 		"react": "^19.2.6",
 		"react-dom": "^19.2.6",
+		"tsup": "^8.5.1",
 		"typescript": "^5.7.0",
 		"vitest": "^4.1.7"
 	},
 	"peerDependencies": {
-		"@graphrefly/ts": ">=0.0.1 <1.0.0",
-		"react": "^18.0.0 || ^19.0.0",
-		"react-dom": "^18.0.0 || ^19.0.0"
+		"@graphrefly/ts": ">=0.6.2 <1.0.0",
+		"react": "^18.0.0 || ^19.0.0"
 	}
 }
