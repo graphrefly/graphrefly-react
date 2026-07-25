@@ -1,7 +1,12 @@
 {
 	"name": "@graphrefly/svelte",
-	"version": "0.1.0",
+	"version": "0.0.0",
 	"description": "Svelte bindings for GraphReFly.",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/graphrefly/graphrefly-react.git",
+		"directory": "packages/svelte"
+	},
 	"type": "module",
 	"sideEffects": false,
 	"main": "dist/index.cjs",

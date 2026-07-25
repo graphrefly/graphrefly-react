@@ -1,7 +1,12 @@
 {
 	"name": "@graphrefly/nestjs",
-	"version": "0.1.0",
+	"version": "0.0.0",
 	"description": "NestJS boundary bindings for GraphReFly.",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/graphrefly/graphrefly-react.git",
+		"directory": "packages/nestjs"
+	},
 	"type": "module",
 	"sideEffects": false,
 	"main": "dist/index.cjs",

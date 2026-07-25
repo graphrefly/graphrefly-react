@@ -1,7 +1,12 @@
 {
 	"name": "@graphrefly/reactive-layout-node-canvas",
-	"version": "0.1.0",
+	"version": "0.0.0",
 	"description": "node-canvas text measurement provider for GraphReFly reactive layout.",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/graphrefly/graphrefly-react.git",
+		"directory": "packages/reactive-layout-node-canvas"
+	},
 	"type": "module",
 	"sideEffects": false,
 	"main": "dist/index.cjs",
