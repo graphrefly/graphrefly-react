@@ -43,11 +43,11 @@
 		"test:watch": "vitest",
 		"dashboard": "node dashboard/build.mjs",
 		"dashboard:check": "node dashboard/build.mjs --check",
-		"build:all": "pnpm run build && pnpm --filter './packages/**' --workspace-concurrency=1 run build",
-		"test:all": "pnpm run test && pnpm --filter './packages/**' --workspace-concurrency=1 run test",
+		"build:all": "pnpm run build",
+		"test:all": "pnpm run test",
 		"changeset": "changeset",
 		"version-packages": "changeset version",
-		"release": "pnpm run build:all && changeset publish"
+		"release": "pnpm run build && changeset publish"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.6",
