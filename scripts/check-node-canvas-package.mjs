@@ -16,32 +16,13 @@ const ROOT = resolve(import.meta.dirname, "..");
 const packageRoot = resolve(process.argv[2] ?? ".");
 const packageJson = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8"));
 const expectedEntries = {
-	"@graphrefly/nestjs": {
-		".": ["GraphReq", "createNestGraphBoundaryRunner", "fromNestReq", "getNestBoundaryBindings"],
-		"./microservices": ["GraphMessage", "createGraphMessageBridge", "provideGraphMessageProviders"],
-		"./native": [
-			"createGraphExceptionFilter",
-			"createNestGraphGuardAwaitScope",
-			"provideGraphNativeProviders",
-		],
-		"./websockets": ["GraphWs", "createGraphWsBridge", "provideGraphWsProviders"],
-	},
 	"@graphrefly/reactive-layout-node-canvas": {
 		".": ["nodeCanvasPackageTextMeasurements"],
-	},
-	"@graphrefly/solid": {
-		".": ["createNodeInput", "createNodeRecord", "createNodeValue"],
-	},
-	"@graphrefly/svelte": {
-		".": ["nodeReadable", "nodeRecord", "nodeWritable"],
-	},
-	"@graphrefly/vue": {
-		".": ["useNodeInput", "useNodeRecord", "useNodeValue"],
 	},
 }[packageJson.name];
 
 function fail(message) {
-	throw new Error(`check-ecosystem-package: ${message}`);
+	throw new Error(`check-node-canvas-package: ${message}`);
 }
 
 function assert(condition, message) {
@@ -223,4 +204,4 @@ unsubscribe();
 	rmSync(externalCwd, { recursive: true, force: true });
 }
 
-console.log(`check-ecosystem-package: ${packageJson.name} ESM/CJS/DTS smoke passed`);
+console.log(`check-node-canvas-package: ${packageJson.name} ESM/CJS/DTS smoke passed`);
