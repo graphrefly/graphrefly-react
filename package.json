@@ -1,6 +1,6 @@
 {
 	"name": "@graphrefly/react",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"description": "Reactive binding + presentation layer for GraphReFly (React). Currently a binding-core spike on top of @graphrefly/ts.",
 	"repository": {
 		"type": "git",
