@@ -1,6 +1,6 @@
 {
 	"name": "@graphrefly/svelte",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "Svelte bindings for GraphReFly.",
 	"repository": {
 		"type": "git",
