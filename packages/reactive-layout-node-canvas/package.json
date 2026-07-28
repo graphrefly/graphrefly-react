@@ -30,7 +30,7 @@
 		"package.json"
 	],
 	"scripts": {
-		"build": "tsup src/index.ts --format esm,cjs --dts --clean && node ../../scripts/check-ecosystem-package.mjs .",
+		"build": "tsup src/index.ts --format esm,cjs --dts --clean && node ../../scripts/check-node-canvas-package.mjs .",
 		"test": "vitest run"
 	},
 	"peerDependencies": {
