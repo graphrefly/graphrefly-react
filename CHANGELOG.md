@@ -1,5 +1,9 @@
 # @graphrefly/react
 
+> Ownership correction: `@graphrefly/reactive-layout-node-canvas` was not published by
+> this repository. Its source and release authority now live in
+> `graphrefly/graphrefly-reactive-layout-node-canvas`.
+
 ## 0.1.0
 
 ### Minor Changes
