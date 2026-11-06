@@ -1,21 +1,19 @@
-# graphrefly-react — agent context
+# React agent entrypoint
 
-Read `CLAUDE.md` for repository scope and authority boundaries. This repository owns its React binding
-and presentation work; GraphReFly engine and protocol authority remain in `~/src/graphrefly-ts` and
-`~/src/graphrefly`.
+Start with [README](README.md) and the [documentation map](docs/README.md).
+[Usage](docs/usage.md) and [development](docs/development.md) explain this package's
+React-owned hooks, reference UI and existing binding constraints. Protocol/runtime
+contracts remain [root](../graphrefly/AGENTS.md) and
+[TS-owned](../graphrefly-ts/AGENTS.md).
 
-When changing authority records or resolving an execution, spend, retry, or stalled-work
-authorization boundary, load and follow the personal
-`$project-governance` skill at `~/.codex/skills/project-governance/SKILL.md`. This is a
-cross-project process floor, not package or GraphReFly product authority. Keep local IDs, records and
-gates independent unless an explicitly approved GraphReFly family contract requires a qualified link.
+[Local slices](plan/slices.jsonl) own status/evidence; [the narrative](docs/plan.md)
+is context. Resolve decisions and new scope through
+[root authority](../graphrefly/authority/README.md) and the
+[ledger locator](../graphrefly/authority/ledgers.jsonl), without inventing a local ledger.
 
-## Shared build and human review
-
-Use the personal `~/.codex/skills/bmad-build/SKILL.md` inside the work selected by this repository's
-dispatch/Goal workflow. Use `~/.codex/skills/bmad-build/references/qa.md` for machine-review lenses,
-finding triage and repairs, together with this repository's own QA checks and completion gates.
-Use `~/.codex/skills/bmad-checkpoint-preview/SKILL.md` for the human review trail; it replaces the old
-repository-ownership-practice checks. Ordinary delivery uses build-handoff mode; explicit checkpoint
-or `--practice` requests use interactive review. The shared skills own only this personal workflow;
-project authority, semantic approvals, execution permissions and work records remain locally governed.
+Follow [personal governance](/Users/davidchenallio/.codex/skills/project-governance/SKILL.md)
+for records/execution classification. Use [bmad-build](.agents/skills/bmad-build/SKILL.md)
+and [bmad-qa](.agents/skills/bmad-qa/SKILL.md) within approved scope.
+Human review uses [bmad-checkpoint-preview](.agents/skills/bmad-checkpoint-preview/SKILL.md):
+build-handoff normally, interactive for explicit checkpoint/`--practice`.
+CLAUDE forwards here; this is the maintained agent entrypoint.
